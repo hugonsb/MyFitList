@@ -1,9 +1,8 @@
 package com.happs.myfitlist.navigation
 
-import androidx.compose.foundation.layout.height
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
@@ -12,40 +11,47 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.happs.myfitlist.R
+import com.happs.myfitlist.ui.theme.MyWhite
 
 @Composable
 fun NavBar(navController: NavHostController) {
-    val items = listOf(
-        BottomNavItem.Treino,
-        BottomNavItem.Dieta,
-        BottomNavItem.Hidratacao,
-        BottomNavItem.Configuracoes,
-    )
+
+    val items = BottomNavItem.items()
 
     NavigationBar(
-        modifier = Modifier.height(50.dp),
-        containerColor = Color.Gray,
-        tonalElevation = 3.dp,
+        //modifier = Modifier.height(70.dp),
+        containerColor = MaterialTheme.colorScheme.primary.copy(0.95f)
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
         items.forEach { screen ->
             NavigationBarItem(
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.White,
-                    unselectedIconColor = Color.White,
-                    indicatorColor = Color.Gray
+                    selectedIconColor = MyWhite,
+                    unselectedIconColor = Color.White.copy(0.85f),
+                    selectedTextColor = MyWhite,
+                    unselectedTextColor = Color.White.copy(0.85f),
+                    indicatorColor = MaterialTheme.colorScheme.tertiary.copy(0.3f)
                 ),
-                label = { Text(screen.label, fontSize = 8.sp) },
-                alwaysShowLabel = false,
-                icon = { Icon(screen.icon, contentDescription = screen.label) },
+                label = { Text(screen.label, fontSize = 10.sp, fontWeight = FontWeight.Bold) },
+                alwaysShowLabel = true,
+                icon = {
+                    Icon(
+                        screen.icon,
+                        contentDescription = screen.label,
+                        modifier = Modifier.size(30.dp)
+                    )
+                },
                 selected = currentDestination?.hierarchy?.any { it.route == screen.route } == true,
                 onClick = {
                     navController.navigate(screen.route) {
@@ -63,9 +69,19 @@ fun NavBar(navController: NavHostController) {
     }
 }
 
-sealed class BottomNavItem(val route: String, val icon: ImageVector, val label: String) {
-    data object Treino : BottomNavItem("treino", Icons.Default.Home, "Treino")
-    data object Dieta : BottomNavItem("dieta", Icons.Default.Home, "Dieta")
-    data object Hidratacao : BottomNavItem("hidratacao", Icons.Default.Home, "Hidratacao")
-    data object Configuracoes : BottomNavItem("configuracoes", Icons.Default.Home, "Configuracoes")
+sealed class BottomNavItem(val route: String, val icon: Painter, val label: String) {
+    class Treino(icon: Painter) : BottomNavItem("treino", icon, "Treino")
+    class Dieta(icon: Painter) : BottomNavItem("dieta", icon, "Dieta")
+    class Configuracoes(icon: Painter) : BottomNavItem("configuracoes", icon, "Configuracoes")
+
+    companion object {
+        @Composable
+        fun items(): List<BottomNavItem> {
+            return listOf(
+                Treino(painterResource(id = R.drawable.nav_icon_treino)),
+                Dieta(painterResource(id = R.drawable.nav_icon_dieta)),
+                Configuracoes(painterResource(id = R.drawable.nav_icon_configuracoes))
+            )
+        }
+    }
 }

@@ -77,7 +77,7 @@ fun ContentCadastro(cadastroViewModel: CadastroViewModel) {
     var enabledButton by remember { mutableStateOf(true) }
 
     val colorsTextFields = OutlinedTextFieldDefaults.colors(
-        unfocusedContainerColor = MyWhite.copy(0.5f),
+        unfocusedContainerColor = MyWhite.copy(0.45f),
         focusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(0.2f),
         errorContainerColor = MaterialTheme.colorScheme.tertiary.copy(0.2f),
         focusedTextColor = MyWhite,
@@ -295,7 +295,7 @@ fun ContentCadastro(cadastroViewModel: CadastroViewModel) {
             enabled = enabledButton,
             colors = ButtonDefaults.buttonColors(
                 containerColor = MaterialTheme.colorScheme.tertiary.copy(
-                    0.2f
+                    0.3f
                 )
             ),
             shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)

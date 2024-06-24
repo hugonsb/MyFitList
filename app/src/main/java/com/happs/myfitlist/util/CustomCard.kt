@@ -9,8 +9,11 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,11 +23,13 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.happs.myfitlist.R
 import com.happs.myfitlist.model.treino.DiaTreino
 import com.happs.myfitlist.model.treino.Exercicio
 import com.happs.myfitlist.ui.theme.MyBlack
@@ -50,7 +55,7 @@ fun CustomCard(diaTreino: DiaTreino, exercicioList: List<Exercicio>, onClick: ()
                 )
             )
             .padding(bottom = 10.dp),
-        shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp),
+        shape = CutCornerShape(topStart = 15.dp, bottomEnd = 15.dp),
         onClick = { }
     ) {
         Column(
@@ -107,12 +112,11 @@ fun CustomCard(diaTreino: DiaTreino, exercicioList: List<Exercicio>, onClick: ()
                         .clickable { expanded = true },
                     contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = "Ver tudo",
-                        fontFamily = myFontTitle,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MyBlack
+                    Icon(
+                        tint = MyBlack,
+                        painter = painterResource(id = R.drawable.baseline_more_horiz_24),
+                        contentDescription = null,
+                        modifier = Modifier.size(35.dp)
                     )
                 }
             } else if (expanded) {
