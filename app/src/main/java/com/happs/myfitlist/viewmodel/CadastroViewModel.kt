@@ -1,0 +1,40 @@
+package com.happs.myfitlist.viewmodel
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.happs.myfitlist.model.usuario.Usuario
+import com.happs.myfitlist.room.treino.TreinoRepository
+import com.happs.myfitlist.state.CadastroState
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+
+class CadastroViewModel(
+    private val treinoRepository: TreinoRepository
+) : ViewModel() {
+    private val _cadastroState = MutableStateFlow(CadastroState())
+    val cadastroState: StateFlow<CadastroState> = _cadastroState.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            treinoRepository.getUsuario().collectLatest { usuario ->
+                // Verifica se o usuário não é nulo antes de atualizar o estado
+                if (usuario != null) {
+                    _cadastroState.update { currentState ->
+                        currentState.copy(
+                            usuario = usuario,
+                            isUserLoaded = true
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    suspend fun addUser(usuario: Usuario) {
+        treinoRepository.addUser(usuario)
+    }
+}
