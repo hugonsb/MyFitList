@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -163,8 +164,10 @@ fun TreinoView() {
             Exercicio(nome = "Prancha", numeroSeries = 3, numeroRepeticoes = 60, idDiaTreino = 6)
         )
 
+        val listState = rememberLazyListState()
+
         if (listDiaTreino.isNotEmpty()) {
-            LazyColumn {
+            LazyColumn(state = listState) {
                 items(listDiaTreino) {
                     CustomCard(
                         diaTreino = it,

@@ -29,6 +29,10 @@ class CadastroViewModel(
                             isUserLoaded = true
                         )
                     }
+                } else {
+                    _cadastroState.update { currentState ->
+                        currentState.copy(isUserLoaded = true)
+                    }
                 }
             }
         }

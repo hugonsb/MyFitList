@@ -58,7 +58,7 @@ fun CadastroView(
 
     if (uiCadastroState.usuario.id != -1) {
         navController.navigate("home") { launchSingleTop = true }
-    } else {
+    } else if (uiCadastroState.isUserLoaded) {
         ContentCadastro(cadastroViewModel)
     }
 }
