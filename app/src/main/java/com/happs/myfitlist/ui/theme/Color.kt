@@ -6,7 +6,6 @@ val MyWhite = Color(0xFFFFFFFF)
 val MyRed = Color(0xFFA21916)
 val MyGray = Color(0xFF444343)
 val MyBlack = Color(0xFF0B0C0F)
-val MyPurple = Color(0xFF6153FF)
 val MyYellow = Color(0xFFFFBF00)
 
 //cores para o tema claro

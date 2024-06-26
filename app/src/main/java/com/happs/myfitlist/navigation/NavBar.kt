@@ -30,7 +30,7 @@ fun NavBar(navController: NavHostController) {
 
     NavigationBar(
         //modifier = Modifier.height(70.dp),
-        containerColor = MaterialTheme.colorScheme.primary.copy(0.95f)
+        containerColor = MaterialTheme.colorScheme.primary.copy(0.9f)
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
         val currentDestination = navBackStackEntry?.destination
@@ -38,10 +38,10 @@ fun NavBar(navController: NavHostController) {
             NavigationBarItem(
                 colors = NavigationBarItemDefaults.colors(
                     selectedIconColor = MyWhite,
-                    unselectedIconColor = Color.White.copy(0.85f),
+                    unselectedIconColor = MyWhite.copy(0.8f),
                     selectedTextColor = MyWhite,
-                    unselectedTextColor = Color.White.copy(0.85f),
-                    indicatorColor = MaterialTheme.colorScheme.tertiary.copy(0.3f)
+                    unselectedTextColor = MyWhite.copy(0.8f),
+                    indicatorColor = MaterialTheme.colorScheme.tertiary.copy(0.35f)
                 ),
                 label = { Text(screen.label, fontSize = 10.sp, fontWeight = FontWeight.Bold) },
                 alwaysShowLabel = true,
@@ -70,7 +70,7 @@ fun NavBar(navController: NavHostController) {
 }
 
 sealed class BottomNavItem(val route: String, val icon: Painter, val label: String) {
-    class Treino(icon: Painter) : BottomNavItem("treino", icon, "Treino")
+    class Treino(icon: Painter) : BottomNavItem("nav_treino", icon, "Treino")
     class Dieta(icon: Painter) : BottomNavItem("dieta", icon, "Dieta")
     class Configuracoes(icon: Painter) : BottomNavItem("configuracoes", icon, "Configurações")
 

@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -39,7 +38,7 @@ import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
 
 @Composable
-fun CustomCard(diaTreino: DiaTreino, exercicioList: List<Exercicio>, onClick: () -> Unit) {
+fun CustomCardDiaTreino(diaTreino: DiaTreino, exercicioList: List<Exercicio>, onClick: () -> Unit) {
 
     //testa o saveable dps
     var expanded by rememberSaveable { mutableStateOf(false) }
@@ -80,7 +79,7 @@ fun CustomCard(diaTreino: DiaTreino, exercicioList: List<Exercicio>, onClick: ()
                 Text(
                     text = diaTreino.grupoMuscular,
                     fontFamily = myFontTitle,
-                    fontSize = 25.sp,
+                    fontSize = 29.sp,
                     fontWeight = FontWeight.Bold,
                     color = MyRed,
                     maxLines = if (expanded) Int.MAX_VALUE else 1,
@@ -97,7 +96,7 @@ fun CustomCard(diaTreino: DiaTreino, exercicioList: List<Exercicio>, onClick: ()
                     fontFamily = myFontBody,
                     fontSize = 15.sp,
                     color = MyBlack,
-                    maxLines = if (expanded) Int.MAX_VALUE else 6,
+                    maxLines = if (expanded) Int.MAX_VALUE else 5,
                     overflow = TextOverflow.Ellipsis,
                     onTextLayout = { textLayoutResult: TextLayoutResult ->
                         detailsOverflow = textLayoutResult.hasVisualOverflow
