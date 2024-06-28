@@ -18,12 +18,12 @@ interface TreinoRepository {
     suspend fun removeUser(usuario: Usuario)
 
     fun getPlanosTreino(): Flow<List<PlanoTreino>>
-    suspend fun addPlanoTreino(planoTreino: PlanoTreino)
+    suspend fun addPlanoTreino(planoTreino: PlanoTreino): Long
     suspend fun updatePlanoTreino(planoTreino: PlanoTreino)
     suspend fun removePlanoTreino(planoTreino: PlanoTreino)
 
     fun getDiasTreino(idPlanoTreino: Int): Flow<List<DiaTreino>>
-    suspend fun addDiaTreino(diaTreino: DiaTreino)
+    suspend fun addDiaTreino(diaTreino: DiaTreino): Long
     suspend fun updateDiaTreino(diaTreino: DiaTreino)
     suspend fun removeDiaTreino(diaTreino: DiaTreino)
 

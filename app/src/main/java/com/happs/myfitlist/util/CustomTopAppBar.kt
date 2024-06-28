@@ -20,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.happs.myfitlist.ui.theme.MyWhite
 import com.happs.myfitlist.ui.theme.myFontTitle
 
 @Composable
@@ -27,9 +28,8 @@ fun CustomTopAppBar(onBackPressed: () -> Unit, barTitle: String) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(60.dp)
             .background(MaterialTheme.colorScheme.primary)
-            .padding(start = 10.dp),
+            .padding(start = 10.dp, top = 5.dp, bottom = 15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Button(
@@ -39,7 +39,7 @@ fun CustomTopAppBar(onBackPressed: () -> Unit, barTitle: String) {
             onClick = {
                 onBackPressed()
             },
-            colors = ButtonDefaults.buttonColors(MaterialTheme.colorScheme.tertiary),
+            colors = ButtonDefaults.buttonColors(MyWhite),
             elevation = ButtonDefaults.buttonElevation(10.dp)
         ) {
             Icon(
@@ -56,7 +56,7 @@ fun CustomTopAppBar(onBackPressed: () -> Unit, barTitle: String) {
             fontFamily = myFontTitle,
             fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onSecondary
+            color = MyWhite
         )
     }
 }

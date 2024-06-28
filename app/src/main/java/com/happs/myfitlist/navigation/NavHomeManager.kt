@@ -9,8 +9,6 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.happs.myfitlist.view.ConfiguracoesView
 import com.happs.myfitlist.view.DietaView
-import com.happs.myfitlist.view.treino.CriarPlanoTreinoView
-import com.happs.myfitlist.view.treino.TreinoView
 
 @Composable
 fun NavHomeManager() {

@@ -26,7 +26,7 @@ interface TreinoDao {
     @Query("SELECT * FROM planotreino")
     fun getPlanosTreino(): Flow<List<PlanoTreino>>
     @Insert
-    suspend fun addPlanoTreino(planoTreino: PlanoTreino)
+    suspend fun addPlanoTreino(planoTreino: PlanoTreino): Long
     @Update
     suspend fun updatePlanoTreino(planoTreino: PlanoTreino)
     @Delete
@@ -35,7 +35,7 @@ interface TreinoDao {
     @Query("SELECT * FROM diaTreino WHERE idPlanoTreino = :idPlanoTreino")
     fun getDiasTreino(idPlanoTreino: Int): Flow<List<DiaTreino>>
     @Insert
-    suspend fun addDiaTreino(diaTreino: DiaTreino)
+    suspend fun addDiaTreino(diaTreino: DiaTreino): Long
     @Update
     suspend fun updateDiaTreino(diaTreino: DiaTreino)
     @Delete

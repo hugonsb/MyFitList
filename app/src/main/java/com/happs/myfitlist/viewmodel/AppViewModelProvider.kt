@@ -9,7 +9,10 @@ import com.happs.myfitlist.MyFitListApplication
 object AppViewModelProvider {
     val Factory = viewModelFactory {
         initializer {
-            CadastroViewModel(myFitList().container.tasksRepository)
+            CadastroViewModel(myFitList().container.treinoRepository)
+        }
+        initializer {
+            CriarPlanoTreinoViewModel(myFitList().container.treinoRepository)
         }
     }
 }

@@ -47,13 +47,15 @@ import com.happs.myfitlist.ui.theme.MyBlack
 import com.happs.myfitlist.ui.theme.MyRed
 import com.happs.myfitlist.ui.theme.MyWhite
 import com.happs.myfitlist.ui.theme.myFontTitle
-import com.happs.myfitlist.util.CustomCardDiaTreino
-import com.happs.myfitlist.util.CustomCardPlanoTreino
+import com.happs.myfitlist.util.tela_treino.CustomCardDiaTreino
+import com.happs.myfitlist.util.tela_treino.CustomCardPlanoTreino
 
 @Composable
 fun TreinoView(navController: NavHostController) {
 
     var expandedPlanoTreinoList by remember { mutableStateOf(false) }
+
+    val listPlanoTreinoState = rememberLazyListState()
 
     // Variável contendo planos de treino de exemplo
     val listPlanoTreino = listOf(
@@ -132,7 +134,6 @@ fun TreinoView(navController: NavHostController) {
                             fontWeight = FontWeight.Bold,
                             color = MyBlack,
                         )
-                        val listPlanoTreinoState = rememberLazyListState()
                         if (listPlanoTreino.isNotEmpty()) {
                             LazyColumn(state = listPlanoTreinoState) {
                                 items(listPlanoTreino) {

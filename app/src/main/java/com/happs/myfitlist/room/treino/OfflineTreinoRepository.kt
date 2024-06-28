@@ -18,8 +18,7 @@ class OfflineTreinoRepository(private val treinoDao: TreinoDao) : TreinoReposito
 
     override fun getPlanosTreino(): Flow<List<PlanoTreino>> = treinoDao.getPlanosTreino()
 
-    override suspend fun addPlanoTreino(planoTreino: PlanoTreino) =
-        treinoDao.addPlanoTreino(planoTreino)
+    override suspend fun addPlanoTreino(planoTreino: PlanoTreino): Long = treinoDao.addPlanoTreino(planoTreino)
 
     override suspend fun updatePlanoTreino(planoTreino: PlanoTreino) =
         treinoDao.updatePlanoTreino(planoTreino)
@@ -30,7 +29,7 @@ class OfflineTreinoRepository(private val treinoDao: TreinoDao) : TreinoReposito
     override fun getDiasTreino(idPlanoTreino: Int): Flow<List<DiaTreino>> =
         treinoDao.getDiasTreino(idPlanoTreino)
 
-    override suspend fun addDiaTreino(diaTreino: DiaTreino) = treinoDao.addDiaTreino(diaTreino)
+    override suspend fun addDiaTreino(diaTreino: DiaTreino): Long = treinoDao.addDiaTreino(diaTreino)
 
     override suspend fun updateDiaTreino(diaTreino: DiaTreino) =
         treinoDao.updateDiaTreino(diaTreino)

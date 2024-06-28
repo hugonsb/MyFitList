@@ -1,4 +1,4 @@
-package com.happs.myfitlist.util
+package com.happs.myfitlist.util.tela_treino
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
