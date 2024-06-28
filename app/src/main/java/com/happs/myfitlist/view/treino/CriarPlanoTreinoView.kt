@@ -3,7 +3,6 @@ package com.happs.myfitlist.view.treino
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,7 +11,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CutCornerShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -58,12 +56,11 @@ fun CriarPlanoTreinoView(
 ) {
 
     val coroutineScope = rememberCoroutineScope()
+    val uiState by viewModel.criarPlanoTreinoState.collectAsState()
 
     val listDiasState = rememberLazyListState()
 
     var isNomePlanoTreinoEror by rememberSaveable { mutableStateOf(false) }
-
-    val uiState by viewModel.criarPlanoTreinoState.collectAsState()
 
     var enabledButton by remember { mutableStateOf(true) }
 

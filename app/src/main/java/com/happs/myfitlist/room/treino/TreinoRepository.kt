@@ -1,9 +1,5 @@
 package com.happs.myfitlist.room.treino
 
-import androidx.room.Delete
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
 import com.happs.myfitlist.model.treino.DiaTreino
 import com.happs.myfitlist.model.treino.Exercicio
 import com.happs.myfitlist.model.treino.PlanoTreino
@@ -17,6 +13,8 @@ interface TreinoRepository {
     suspend fun updateUser(usuario: Usuario)
     suspend fun removeUser(usuario: Usuario)
 
+    suspend fun updatePlanoTreinoPrincipal(usuarioId: Int, planoTreinoId: Int)
+    fun getPlanoTreinoPrincipal(idPlanoTreinoPrincipal: Int): Flow<PlanoTreino>
     fun getPlanosTreino(): Flow<List<PlanoTreino>>
     suspend fun addPlanoTreino(planoTreino: PlanoTreino): Long
     suspend fun updatePlanoTreino(planoTreino: PlanoTreino)

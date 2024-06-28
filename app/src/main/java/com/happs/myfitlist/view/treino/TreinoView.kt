@@ -4,6 +4,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -21,7 +22,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
@@ -30,39 +32,47 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
-import com.happs.myfitlist.model.treino.DiaTreino
-import com.happs.myfitlist.model.treino.Exercicio
-import com.happs.myfitlist.model.treino.PlanoTreino
+import com.happs.myfitlist.R
 import com.happs.myfitlist.ui.theme.MyBlack
 import com.happs.myfitlist.ui.theme.MyRed
 import com.happs.myfitlist.ui.theme.MyWhite
+import com.happs.myfitlist.ui.theme.MyYellow
+import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.util.tela_treino.CustomCardDiaTreino
 import com.happs.myfitlist.util.tela_treino.CustomCardPlanoTreino
+import com.happs.myfitlist.viewmodel.AppViewModelProvider
+import com.happs.myfitlist.viewmodel.TreinoViewModel
 
 @Composable
-fun TreinoView(navController: NavHostController) {
+fun TreinoView(
+    navController: NavHostController,
+    viewModel: TreinoViewModel = viewModel(factory = AppViewModelProvider.Factory)
+) {
+    val uiState by viewModel.treinoState.collectAsState()
 
     var expandedPlanoTreinoList by remember { mutableStateOf(false) }
 
     val listPlanoTreinoState = rememberLazyListState()
+    val listDiaTreinoState = rememberLazyListState()
 
-    // Variável contendo planos de treino de exemplo
-    val listPlanoTreino = listOf(
-        PlanoTreino(id = 1, nome = "Treino do meu amigo trembolonado", idUsuario = 1),
-        PlanoTreino(id = 2, nome = "Treino do Renato Cariri lesionado", idUsuario = 1),
-        PlanoTreino(id = 3, nome = "Treino do LALA", idUsuario = 1),
-    )
+    val listPlanoTreino = uiState.listaPlanosTreino
+    val listDiaTreino = uiState.diasComExercicios
 
     Column(
         modifier = Modifier
@@ -84,9 +94,11 @@ fun TreinoView(navController: NavHostController) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Olá Fulano 💪",
+                    text = "Olá ${uiState.nomeUsuario} 💪",
                     fontFamily = myFontTitle,
                     fontSize = 50.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.Bold,
                     color = MyWhite,
                 )
@@ -102,7 +114,7 @@ fun TreinoView(navController: NavHostController) {
                 ) {
                     Icon(
                         tint = MaterialTheme.colorScheme.primary,
-                        imageVector = Icons.Default.Menu,
+                        imageVector = if (!expandedPlanoTreinoList) Icons.Default.Add else Icons.Default.Clear,
                         contentDescription = null,
                         modifier = Modifier.size(35.dp)
                     )
@@ -123,9 +135,11 @@ fun TreinoView(navController: NavHostController) {
                         disabledContentColor = MyWhite
                     )
                 ) {
-                    Column(modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(10.dp)) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(10.dp)
+                    ) {
                         Text(
                             modifier = Modifier.padding(start = 5.dp, bottom = 5.dp),
                             text = "Planos de treino",
@@ -137,20 +151,42 @@ fun TreinoView(navController: NavHostController) {
                         if (listPlanoTreino.isNotEmpty()) {
                             LazyColumn(state = listPlanoTreinoState) {
                                 items(listPlanoTreino) {
-                                    CustomCardPlanoTreino(
-                                        it,
-                                        onClick = {}
-                                    )
+                                    Row(
+                                        modifier = Modifier.clickable {
+
+                                            //aqui vc troca o plano de treino principal do usuario
+                                        },
+                                        horizontalArrangement = Arrangement.Start,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(
+                                            tint = MyYellow,
+                                            painter = painterResource(id = if (uiState.planoTreinoPrincipal.id == it.id) R.drawable.baseline_star_24 else R.drawable.baseline_star_border_24),
+                                            contentDescription = "Selecionar como principal",
+                                            modifier = Modifier.size(30.dp)
+                                        )
+                                        Text(
+                                            text = it.nome,
+                                            fontFamily = myFontBody,
+                                            fontSize = 15.sp,
+                                            color = MyBlack,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
                                 }
                             }
                         }
                         OutlinedButton(
-                            onClick = { navController.navigate("criar_plano_treino") { launchSingleTop = true } },
+                            onClick = {
+                                navController.navigate("criar_plano_treino") {
+                                    launchSingleTop = true
+                                }
+                            },
                             colors = ButtonDefaults.buttonColors(containerColor = MyRed),
                             shape = RoundedCornerShape(10.dp),
                             modifier = Modifier
-                                .align(Alignment.CenterHorizontally),
-                            //contentPadding = PaddingValues(0.dp)
+                                .align(Alignment.CenterHorizontally)
                         ) {
                             Text(
                                 text = "NOVO PLANO",
@@ -165,10 +201,15 @@ fun TreinoView(navController: NavHostController) {
             }
         }
 
-        if (!expandedPlanoTreinoList) {
+        if (!expandedPlanoTreinoList && uiState.planoTreinoPrincipal.idUsuario != -1) {
             Text(
-                text = "Plano de treino 1",
+                modifier = Modifier.clickable {
+                    expandedPlanoTreinoList = !expandedPlanoTreinoList
+                },
+                text = uiState.planoTreinoPrincipal.nome,
                 fontFamily = myFontTitle,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
                 fontSize = 22.sp,
                 color = MyWhite,
             )
@@ -176,92 +217,30 @@ fun TreinoView(navController: NavHostController) {
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // Variável contendo os dias da semana de exemplo
-        val listDiaTreino = listOf(
-            DiaTreino(id = 1, dia = "Segunda-feira", grupoMuscular = "Peito", idPlanoTreino = 1),
-            DiaTreino(id = 2, dia = "Terça-feira", grupoMuscular = "Costas", idPlanoTreino = 1),
-            DiaTreino(id = 3, dia = "Quarta-feira", grupoMuscular = "Pernas", idPlanoTreino = 1),
-            DiaTreino(id = 4, dia = "Quinta-feira", grupoMuscular = "Ombros", idPlanoTreino = 1),
-            DiaTreino(id = 5, dia = "Sexta-feira", grupoMuscular = "Braços", idPlanoTreino = 1),
-            DiaTreino(id = 6, dia = "Sábado", grupoMuscular = "Abdômen", idPlanoTreino = 1),
-            DiaTreino(id = 7, dia = "Domingo", grupoMuscular = "Descanso", idPlanoTreino = 1)
-        )
 
-        // Variável contendo uma lista de exercícios de exemplo
-        val listExercicio = listOf(
-            Exercicio(
-                nome = "Supino Reto",
-                numeroSeries = 3,
-                numeroRepeticoes = 10,
-                idDiaTreino = 1
-            ),
-            Exercicio(
-                nome = "Crucifixo Inclinado",
-                numeroSeries = 3,
-                numeroRepeticoes = 12,
-                idDiaTreino = 1
-            ),
-            Exercicio(
-                nome = "Puxada Alta",
-                numeroSeries = 3,
-                numeroRepeticoes = 10,
-                idDiaTreino = 2
-            ),
-            Exercicio(
-                nome = "Remada Curvada",
-                numeroSeries = 3,
-                numeroRepeticoes = 12,
-                idDiaTreino = 2
-            ),
-            Exercicio(
-                nome = "Agachamento",
-                numeroSeries = 3,
-                numeroRepeticoes = 12,
-                idDiaTreino = 3
-            ),
-            Exercicio(nome = "Leg Press", numeroSeries = 3, numeroRepeticoes = 15, idDiaTreino = 3),
-            Exercicio(
-                nome = "Desenvolvimento com Halteres",
-                numeroSeries = 3,
-                numeroRepeticoes = 10,
-                idDiaTreino = 4
-            ),
-            Exercicio(
-                nome = "Elevação Lateral",
-                numeroSeries = 3,
-                numeroRepeticoes = 12,
-                idDiaTreino = 4
-            ),
-            Exercicio(
-                nome = "Rosca Direta",
-                numeroSeries = 3,
-                numeroRepeticoes = 10,
-                idDiaTreino = 5
-            ),
-            Exercicio(
-                nome = "Tríceps Testa",
-                numeroSeries = 3,
-                numeroRepeticoes = 12,
-                idDiaTreino = 5
-            ),
-            Exercicio(
-                nome = "Abdominal Supra",
-                numeroSeries = 3,
-                numeroRepeticoes = 15,
-                idDiaTreino = 6
-            ),
-            Exercicio(nome = "Prancha", numeroSeries = 3, numeroRepeticoes = 60, idDiaTreino = 6)
-        )
-
-        val listDiaTreinoState = rememberLazyListState()
         if (listDiaTreino.isNotEmpty()) {
             LazyColumn(state = listDiaTreinoState) {
                 items(listDiaTreino) {
                     CustomCardDiaTreino(
-                        diaTreino = it,
-                        exercicioList = listExercicio,
+                        diaTreino = it.first,
+                        exercicioList = it.second,
                         onClick = {})
                 }
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Nenhum plano de treino selecionado",
+                    textAlign = TextAlign.Center,
+                    fontFamily = myFontTitle,
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MyWhite,
+                )
             }
         }
     }

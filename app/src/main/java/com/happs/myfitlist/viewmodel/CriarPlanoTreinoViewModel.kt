@@ -11,6 +11,7 @@ import com.happs.myfitlist.util.cadastro_plano_treino.DiasList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 
 class CriarPlanoTreinoViewModel(
@@ -20,12 +21,6 @@ class CriarPlanoTreinoViewModel(
     private val _criarPlanoTreinoState = MutableStateFlow(CriarPlanoTreinoState())
     val criarPlanoTreinoState: StateFlow<CriarPlanoTreinoState> =
         _criarPlanoTreinoState.asStateFlow()
-
-    private var idUsuario: Int = 1 // valor default, pode ser atualizado dinamicamente
-
-    fun setUsuarioId(id: Int) {
-        idUsuario = id
-    }
 
     fun setNomePlanoTreino(nome: String) {
         _criarPlanoTreinoState.update { currentState ->
@@ -89,12 +84,16 @@ class CriarPlanoTreinoViewModel(
 
     suspend fun savePlanoTreino(): Pair<Boolean, String> {
         return try {
+
+            val usuarioId = treinoRepository.getUsuario().first().id
+
             val state = _criarPlanoTreinoState.value
             val planoTreino = PlanoTreino(
-                nome = state.nomePlanoTreino,idUsuario = 1 // ALTERE ESSE ID AQUI PRA SER DINAMICO E N DAR PROBLEMA
+                nome = state.nomePlanoTreino,
+                idUsuario = usuarioId
             )
 
-            if (state.nomePlanoTreino.isEmpty()){
+            if (state.nomePlanoTreino.isEmpty()) {
                 throw Exception("Nome do plano não pode ser vazio")
             }
 
@@ -104,7 +103,7 @@ class CriarPlanoTreinoViewModel(
 
             val planoTreinoId = treinoRepository.addPlanoTreino(planoTreino).toInt()
 
-            DiasList.dias.forEachIndexed { i,dia ->
+            DiasList.dias.forEachIndexed { i, dia ->
                 val diaTreino = DiaTreino(
                     dia = dia,
                     grupoMuscular = state.grupoMuscular[i],
@@ -117,6 +116,8 @@ class CriarPlanoTreinoViewModel(
                     treinoRepository.addExercicio(exercicioComIdAtualizado)
                 }
             }
+
+            treinoRepository.updatePlanoTreinoPrincipal(usuarioId = usuarioId, planoTreinoId = planoTreinoId)
 
             // Resetar o estado após salvar
             _criarPlanoTreinoState.update { CriarPlanoTreinoState() }

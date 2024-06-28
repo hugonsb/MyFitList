@@ -26,27 +26,5 @@ import com.happs.myfitlist.ui.theme.myFontBody
 @Composable
 fun CustomCardPlanoTreino(planoTreino: PlanoTreino, onClick: () -> Unit) {
 
-    var starClick by remember { mutableStateOf(false) }
 
-    Row(
-        modifier = Modifier.clickable { starClick = !starClick },
-        horizontalArrangement = Arrangement.Start,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            tint = MyYellow,
-            painter = painterResource(id = if (!starClick) R.drawable.baseline_star_border_24 else R.drawable.baseline_star_24),
-            contentDescription = "Selecionar como principal",
-            modifier = Modifier.size(30.dp)
-        )
-        Text(
-            text = planoTreino.nome,
-            fontFamily = myFontBody,
-            fontSize = 15.sp,
-            //fontWeight = FontWeight.Bold,
-            color = MyBlack,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
-    }
 }

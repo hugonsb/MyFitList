@@ -12,6 +12,9 @@ object AppViewModelProvider {
             CadastroViewModel(myFitList().container.treinoRepository)
         }
         initializer {
+            TreinoViewModel(myFitList().container.treinoRepository)
+        }
+        initializer {
             CriarPlanoTreinoViewModel(myFitList().container.treinoRepository)
         }
     }
