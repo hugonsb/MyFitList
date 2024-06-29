@@ -80,7 +80,6 @@ fun CriarPlanoTreinoView(
             }
         }, barTitle = "Criar plano de treino")
 
-
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -55,7 +54,6 @@ import com.happs.myfitlist.ui.theme.MyYellow
 import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.util.tela_treino.CustomCardDiaTreino
-import com.happs.myfitlist.util.tela_treino.CustomCardPlanoTreino
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.TreinoViewModel
 
@@ -73,6 +71,8 @@ fun TreinoView(
 
     val listPlanoTreino = uiState.listaPlanosTreino
     val listDiaTreino = uiState.diasComExercicios
+    val usuario = uiState.usuario
+    val planoTreinoPrincipal = uiState.planoTreinoPrincipal
 
     Column(
         modifier = Modifier
@@ -94,13 +94,14 @@ fun TreinoView(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Olá ${uiState.nomeUsuario} 💪",
+                    text = "Olá ${usuario.nome.split(" ")[0]} 💪",
                     fontFamily = myFontTitle,
                     fontSize = 50.sp,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     fontWeight = FontWeight.Bold,
                     color = MyWhite,
+                    modifier = Modifier.weight(0.9f)
                 )
 
                 OutlinedButton(
@@ -108,8 +109,8 @@ fun TreinoView(
                     colors = ButtonDefaults.buttonColors(containerColor = MyWhite),
                     shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp),
                     modifier = Modifier
-                        .height(50.dp)
-                        .width(70.dp),
+                        .weight(0.2f)
+                        .height(50.dp),
                     contentPadding = PaddingValues(0.dp)
                 ) {
                     Icon(
@@ -121,7 +122,7 @@ fun TreinoView(
                 }
             }
 
-            Spacer(modifier = Modifier.height(10.dp))
+            Spacer(modifier = Modifier.height(15.dp))
 
             if (expandedPlanoTreinoList) {
                 Card(
@@ -151,28 +152,51 @@ fun TreinoView(
                         if (listPlanoTreino.isNotEmpty()) {
                             LazyColumn(state = listPlanoTreinoState) {
                                 items(listPlanoTreino) {
-                                    Row(
-                                        modifier = Modifier.clickable {
-
-                                            //aqui vc troca o plano de treino principal do usuario
-                                        },
-                                        horizontalArrangement = Arrangement.Start,
-                                        verticalAlignment = Alignment.CenterVertically
+                                    Card(
+                                        modifier = Modifier.padding(bottom = 10.dp),
+                                        shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp)
                                     ) {
-                                        Icon(
-                                            tint = MyYellow,
-                                            painter = painterResource(id = if (uiState.planoTreinoPrincipal.id == it.id) R.drawable.baseline_star_24 else R.drawable.baseline_star_border_24),
-                                            contentDescription = "Selecionar como principal",
-                                            modifier = Modifier.size(30.dp)
-                                        )
-                                        Text(
-                                            text = it.nome,
-                                            fontFamily = myFontBody,
-                                            fontSize = 15.sp,
-                                            color = MyBlack,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
+                                        Row(
+                                            modifier = Modifier
+                                                .background(MyBlack.copy(0.1f))
+                                                .padding(5.dp)
+                                                .fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            Row(modifier = Modifier
+                                                .clickable {
+                                                    viewModel.atualizarPlanoTreinoPrincipal(
+                                                        usuario.id,
+                                                        it.id
+                                                    )
+                                                }) {
+                                                Icon(
+                                                    tint = MyYellow,
+                                                    painter = painterResource(id = if (planoTreinoPrincipal.id == it.id) R.drawable.baseline_star_24 else R.drawable.baseline_star_border_24),
+                                                    contentDescription = "Selecionar como principal",
+                                                    modifier = Modifier
+                                                        .size(30.dp)
+                                                        .padding(end = 5.dp)
+                                                )
+                                                Text(
+                                                    text = it.nome,
+                                                    fontFamily = myFontBody,
+                                                    fontSize = 15.sp,
+                                                    color = MyBlack,
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                            Icon(
+                                                modifier = Modifier.clickable {
+                                                    viewModel.excluirPlanoTreino(it)
+                                                },
+                                                tint = MyBlack,
+                                                painter = painterResource(id = R.drawable.baseline_close_24),
+                                                contentDescription = "Remover exercício",
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -201,22 +225,39 @@ fun TreinoView(
             }
         }
 
-        if (!expandedPlanoTreinoList && uiState.planoTreinoPrincipal.idUsuario != -1) {
-            Text(
-                modifier = Modifier.clickable {
-                    expandedPlanoTreinoList = !expandedPlanoTreinoList
-                },
-                text = uiState.planoTreinoPrincipal.nome,
-                fontFamily = myFontTitle,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                fontSize = 22.sp,
-                color = MyWhite,
-            )
+        if (!expandedPlanoTreinoList && usuario.idPlanoTreinoPrincipal != -1) {
+            Card(onClick = {
+                //aqui coloca o editarPlanoTreinoView
+            }, shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp)) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(55.dp)
+                        .background(MyRed.copy(0.6f))
+                        .padding(start = 10.dp, end = 20.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = planoTreinoPrincipal.nome,
+                        fontFamily = myFontTitle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 22.sp,
+                        color = MyWhite,
+                    )
+                    Icon(
+                        tint = MyWhite,
+                        painter = painterResource(id = R.drawable.baseline_edit_24),
+                        contentDescription = "Editar plano",
+                        modifier = Modifier
+                            .size(30.dp)
+                    )
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
-
+        Spacer(modifier = Modifier.height(25.dp))
 
         if (listDiaTreino.isNotEmpty()) {
             LazyColumn(state = listDiaTreinoState) {

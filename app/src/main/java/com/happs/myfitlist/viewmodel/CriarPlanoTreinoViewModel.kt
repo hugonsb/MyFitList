@@ -117,7 +117,10 @@ class CriarPlanoTreinoViewModel(
                 }
             }
 
-            treinoRepository.updatePlanoTreinoPrincipal(usuarioId = usuarioId, planoTreinoId = planoTreinoId)
+            treinoRepository.updatePlanoTreinoPrincipal(
+                usuarioId = usuarioId,
+                planoTreinoId = planoTreinoId
+            )
 
             // Resetar o estado após salvar
             _criarPlanoTreinoState.update { CriarPlanoTreinoState() }
@@ -125,6 +128,47 @@ class CriarPlanoTreinoViewModel(
         } catch (e: Exception) {
             Log.e("CriarPlanoTreino", "Erro: ${e.message}")
             Pair(false, e.message.toString()) // Retorna erro com mensagem
+        }
+    }
+
+    suspend fun editarPlanoTreino(planoTreino: PlanoTreino): Pair<Boolean, String> {
+        return try {
+            val state = _criarPlanoTreinoState.value
+
+            // Atualiza o PlanoTreino
+            treinoRepository.updatePlanoTreino(planoTreino.copy(nome = state.nomePlanoTreino))
+
+            // Remove os DiasTreino e Exercicios antigos
+            val diasTreinoAntigos = treinoRepository.getDiasTreino(planoTreino.id).first()
+            diasTreinoAntigos.forEach { diaTreino ->
+                val exerciciosAntigos = treinoRepository.getExercicios(diaTreino.id).first()
+                exerciciosAntigos.forEach { exercicio ->
+                    treinoRepository.removeExercicio(exercicio)
+                }
+                treinoRepository.removeDiaTreino(diaTreino)
+            }
+
+            // Adiciona os novos DiasTreino e Exercicios
+            DiasList.dias.forEachIndexed { i, dia ->
+                val diaTreino = DiaTreino(
+                    dia = dia,
+                    grupoMuscular = state.grupoMuscular[i],
+                    idPlanoTreino = planoTreino.id
+                )
+                val idDiaTreino = treinoRepository.addDiaTreino(diaTreino).toInt()
+
+                state.exerciciosList[i].forEach { exercicio ->
+                    val exercicioComIdAtualizado = exercicio.copy(idDiaTreino = idDiaTreino)
+                    treinoRepository.addExercicio(exercicioComIdAtualizado)
+                }
+            }
+
+            // Resetar o estado após salvar
+            _criarPlanoTreinoState.update { CriarPlanoTreinoState() }
+            Pair(true, "Editado com sucesso")
+        } catch (e: Exception) {
+            Log.e("CriarPlanoTreino", "Erro ao editar: ${e.message}")
+            Pair(false, e.message.toString())
         }
     }
 }

@@ -1,5 +1,6 @@
 package com.happs.myfitlist.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.happs.myfitlist.model.usuario.Usuario
@@ -22,6 +23,7 @@ class CadastroViewModel(
         viewModelScope.launch {
             treinoRepository.getUsuario().collectLatest { usuario ->
                 // Verifica se o usuário não é nulo antes de atualizar o estado
+                Log.e("cadastroViewModel", "usuario: $usuario")
                 if (usuario != null) {
                     _cadastroState.update { currentState ->
                         currentState.copy(

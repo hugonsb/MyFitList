@@ -280,7 +280,7 @@ fun ContentCadastro(cadastroViewModel: CadastroViewModel) {
                             nome = nome,
                             idade = idade.toByteOrNull() ?: -1,
                             peso = peso.toFloatOrNull() ?: -1f,
-                            idPlanoTreinoPrincipal = null
+                            idPlanoTreinoPrincipal = -1
                         )
                     coroutineScope.launch {
                         cadastroViewModel.addUser(usuario)
