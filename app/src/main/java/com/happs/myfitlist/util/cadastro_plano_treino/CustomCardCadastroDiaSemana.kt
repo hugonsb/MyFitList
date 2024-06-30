@@ -41,8 +41,8 @@ import com.happs.myfitlist.ui.theme.TextFieldColors
 import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
-import com.happs.myfitlist.viewmodel.CriarPlanoTreinoViewModel
-import com.happs.myfitlist.viewmodel.EditarPlanoViewModel
+import com.happs.myfitlist.viewmodel.treino.CriarPlanoTreinoViewModel
+import com.happs.myfitlist.viewmodel.treino.EditarPlanoViewModel
 
 @Composable
 fun CustomCardCadastroDiaSemana(

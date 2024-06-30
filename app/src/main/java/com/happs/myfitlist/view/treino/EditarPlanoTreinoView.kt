@@ -46,7 +46,7 @@ import com.happs.myfitlist.util.CustomTopAppBar
 import com.happs.myfitlist.util.cadastro_plano_treino.CustomCardEditarDiaSemana
 import com.happs.myfitlist.util.cadastro_plano_treino.DiasList
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
-import com.happs.myfitlist.viewmodel.EditarPlanoViewModel
+import com.happs.myfitlist.viewmodel.treino.EditarPlanoViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -138,7 +138,7 @@ fun EditarPlanoTreinoView(
                         enabledButton = false
                         val (success, message) = viewModel.editarPlanoTreino(planoTreinoId)
                         if (success) {
-                            navController.navigate("treino")
+                            navController.popBackStack("treino", false)
                         } else {
                             enabledButton = true
                         }

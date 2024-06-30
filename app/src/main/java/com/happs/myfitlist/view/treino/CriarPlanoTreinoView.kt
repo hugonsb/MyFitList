@@ -46,7 +46,7 @@ import com.happs.myfitlist.util.cadastro_plano_treino.CustomCardCadastroDiaSeman
 import com.happs.myfitlist.util.CustomTopAppBar
 import com.happs.myfitlist.util.cadastro_plano_treino.DiasList
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
-import com.happs.myfitlist.viewmodel.CriarPlanoTreinoViewModel
+import com.happs.myfitlist.viewmodel.treino.CriarPlanoTreinoViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -136,7 +136,7 @@ fun CriarPlanoTreinoView(
                         enabledButton = false
                         val (success, message) = viewModel.savePlanoTreino()
                         if (success) {
-                            navController.navigate("treino")
+                            navController.popBackStack("treino", false)
                         } else {
                             enabledButton = true
                         }

@@ -1,6 +1,5 @@
-package com.happs.myfitlist.viewmodel
+package com.happs.myfitlist.viewmodel.treino
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.happs.myfitlist.model.treino.PlanoTreino
@@ -9,10 +8,12 @@ import com.happs.myfitlist.state.TreinoState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.combine
 
 class TreinoViewModel(
     private val treinoRepository: TreinoRepository
@@ -23,25 +24,28 @@ class TreinoViewModel(
 
     init {
         viewModelScope.launch {
-            try {
+            combine(
+                treinoRepository.getUsuario(),
+                treinoRepository.getPlanosTreino(),
+                treinoRepository.getDiasTreino(treinoState.value.planoTreinoPrincipal.id)
+            ) { _, _, _ ->
                 atualizarEstado()
-            } catch (e: Exception) {
-                Log.e("TreinoViewModel", "ERRO $e")
-            }
+            }.collectLatest { }
         }
     }
 
     private suspend fun atualizarEstado() {
         val usuarioFlow = treinoRepository.getUsuario()
-        val planoTreinoPrincipalFlow =
-            usuarioFlow.first().idPlanoTreinoPrincipal.let {
-                if (it != -1) treinoRepository.getPlanoTreino(it) else flowOf(treinoState.value.planoTreinoPrincipal)
-            }
+        val usuario = usuarioFlow.first()
+        val planoTreinoPrincipalFlow = if (usuario.idPlanoTreinoPrincipal != -1) {
+            treinoRepository.getPlanoTreino(usuario.idPlanoTreinoPrincipal)
+        } else {
+            flowOf(null)
+        }
 
         val planoTreinoPrincipal = planoTreinoPrincipalFlow.first()
-        val usuario = usuarioFlow.first()
 
-        val diasTreino = if (planoTreinoPrincipal.id != -1) {
+        val diasTreino = if (planoTreinoPrincipal != null && planoTreinoPrincipal.id != -1) {
             treinoRepository.getDiasTreino(planoTreinoPrincipal.id).first()
         } else {
             emptyList()
@@ -55,7 +59,11 @@ class TreinoViewModel(
         _treinoState.update { currentState ->
             currentState.copy(
                 usuario = usuario,
-                planoTreinoPrincipal = planoTreinoPrincipal,
+                planoTreinoPrincipal = planoTreinoPrincipal ?: PlanoTreino(
+                    id = -1,
+                    nome = "",
+                    idUsuario = -1
+                ),
                 listaPlanosTreino = treinoRepository.getPlanosTreino().first(),
                 diasComExercicios = diasComExercicios
             )
