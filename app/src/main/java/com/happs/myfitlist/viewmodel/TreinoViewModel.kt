@@ -35,7 +35,7 @@ class TreinoViewModel(
         val usuarioFlow = treinoRepository.getUsuario()
         val planoTreinoPrincipalFlow =
             usuarioFlow.first().idPlanoTreinoPrincipal.let {
-                if (it != -1) treinoRepository.getPlanoTreinoPrincipal(it) else flowOf(treinoState.value.planoTreinoPrincipal)
+                if (it != -1) treinoRepository.getPlanoTreino(it) else flowOf(treinoState.value.planoTreinoPrincipal)
             }
 
         val planoTreinoPrincipal = planoTreinoPrincipalFlow.first()

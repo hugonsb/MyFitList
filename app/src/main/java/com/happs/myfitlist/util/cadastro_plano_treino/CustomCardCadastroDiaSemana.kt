@@ -42,6 +42,7 @@ import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.CriarPlanoTreinoViewModel
+import com.happs.myfitlist.viewmodel.EditarPlanoViewModel
 
 @Composable
 fun CustomCardCadastroDiaSemana(
@@ -148,6 +149,137 @@ fun CustomCardCadastroDiaSemana(
 
                 if (expandedAdicionarExercicio) {
                     CustomCardCadastroExercicio(
+                        indiceDia,
+                        onClickSalvar = { expandedAdicionarExercicio = false },
+                        onClickCancelar = { expandedAdicionarExercicio = false })
+                } else {
+                    OutlinedButton(
+                        onClick = {
+                            expandedAdicionarExercicio = true
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MyRed),
+                        shape = RoundedCornerShape(10.dp),
+                        modifier = Modifier
+                            .align(Alignment.CenterHorizontally),
+                    ) {
+                        Text(
+                            text = "Adicionar exercício",
+                            fontFamily = myFontTitle,
+                            fontSize = 18.sp,
+                            color = MyWhite,
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun CustomCardEditarDiaSemana(
+    indiceDia: Int,
+    nomeDia: String,
+    viewModel: EditarPlanoViewModel = viewModel(
+        factory = AppViewModelProvider.Factory
+    )
+) {
+    val uiState by viewModel.editarPlanoState.collectAsState()
+
+    var isGrupoMuscularError by rememberSaveable { mutableStateOf(false) }
+
+    var expandedAdicionarExercicio by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 20.dp),
+        shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MyWhite)
+                .padding(10.dp)
+        ) {
+            Text(
+                modifier = Modifier
+                    .padding(start = 5.dp, bottom = 5.dp)
+                    .align(Alignment.Start),
+                text = nomeDia,
+                fontFamily = myFontTitle,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold,
+                color = MyBlack,
+            )
+
+            Column {
+                OutlinedTextField(
+                    value = uiState.grupoMuscular[indiceDia],
+                    onValueChange = {
+                        if (it.length <= 100) {
+                            viewModel.setGrupoMuscular(indiceDia, it)
+                            isGrupoMuscularError = false
+                        }
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Text,
+                        capitalization = KeyboardCapitalization.Sentences
+                    ),
+                    isError = isGrupoMuscularError,
+                    supportingText = { if (isGrupoMuscularError) Text("Informe o Grupo muscular") },
+                    placeholder = {
+                        Text(
+                            text = "Grupo muscular",
+                            fontFamily = myFontBody,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = TextFieldColors.colorsTextFieldsCard(),
+                    textStyle = TextStyle(
+                        fontFamily = myFontBody,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
+                )
+
+                uiState.exerciciosList[indiceDia].forEach { exercicio ->
+                    Card(
+                        modifier = Modifier.padding(bottom = 10.dp),
+                        shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .background(MyRed.copy(0.3f))
+                                .padding(5.dp)
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "${exercicio.nome} ${exercicio.numeroSeries}x${exercicio.numeroRepeticoes}",
+                                fontFamily = myFontBody,
+                                fontSize = 15.sp,
+                                color = MyBlack,
+                            )
+                            Icon(
+                                modifier = Modifier.clickable {
+                                    viewModel.removerExercicio(indiceDia, exercicio)
+                                },
+                                tint = MyBlack,
+                                painter = painterResource(id = R.drawable.baseline_close_24),
+                                contentDescription = "Remover exercício",
+                            )
+                        }
+                    }
+                }
+
+                if (expandedAdicionarExercicio) {
+                    CustomCardEditarExercicio(
                         indiceDia,
                         onClickSalvar = { expandedAdicionarExercicio = false },
                         onClickCancelar = { expandedAdicionarExercicio = false })

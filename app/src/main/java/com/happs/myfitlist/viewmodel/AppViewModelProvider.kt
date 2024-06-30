@@ -1,6 +1,7 @@
 package com.happs.myfitlist.viewmodel
 
 import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory
+import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
@@ -16,6 +17,10 @@ object AppViewModelProvider {
         }
         initializer {
             CriarPlanoTreinoViewModel(myFitList().container.treinoRepository)
+        }
+        initializer {
+            val savedStateHandle = createSavedStateHandle()
+            EditarPlanoViewModel(myFitList().container.treinoRepository, savedStateHandle)
         }
     }
 }

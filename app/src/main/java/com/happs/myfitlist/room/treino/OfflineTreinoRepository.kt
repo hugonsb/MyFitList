@@ -18,8 +18,8 @@ class OfflineTreinoRepository(private val treinoDao: TreinoDao) : TreinoReposito
     override suspend fun updatePlanoTreinoPrincipal(usuarioId: Int, planoTreinoId: Int) =
         treinoDao.updatePlanoTreinoPrincipal(usuarioId, planoTreinoId)
 
-    override fun getPlanoTreinoPrincipal(idPlanoTreinoPrincipal: Int): Flow<PlanoTreino> =
-        treinoDao.getPlanoTreinoPrincipal(idPlanoTreinoPrincipal)
+    override fun getPlanoTreino(idPlanoTreino: Int): Flow<PlanoTreino> =
+        treinoDao.getPlanoTreino(idPlanoTreino)
 
     override fun getPlanosTreino(): Flow<List<PlanoTreino>> = treinoDao.getPlanosTreino()
 

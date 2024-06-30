@@ -227,7 +227,9 @@ fun TreinoView(
 
         if (!expandedPlanoTreinoList && usuario.idPlanoTreinoPrincipal != -1) {
             Card(onClick = {
-                //aqui coloca o editarPlanoTreinoView
+                navController.navigate("editar_plano/${usuario.idPlanoTreinoPrincipal}") {
+                    launchSingleTop = true
+                }
             }, shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp)) {
                 Row(
                     modifier = Modifier

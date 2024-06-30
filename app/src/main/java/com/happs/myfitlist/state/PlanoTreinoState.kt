@@ -2,7 +2,7 @@ package com.happs.myfitlist.state
 
 import com.happs.myfitlist.model.treino.Exercicio
 
-data class CriarPlanoTreinoState(
+data class PlanoTreinoState(
     val nomePlanoTreino: String = "",
     //cada posiçao nas listas se refere ao dia da semana, 1 = domingo, 2 = segunda ...
     val grupoMuscular: MutableList<String> = MutableList(7) { "" },

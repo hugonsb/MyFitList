@@ -29,8 +29,8 @@ interface TreinoDao {
     @Query("UPDATE usuario SET idPlanoTreinoPrincipal = :planoTreinoId WHERE id = :usuarioId")
     suspend fun updatePlanoTreinoPrincipal(usuarioId: Int, planoTreinoId: Int)
 
-    @Query("SELECT * FROM planotreino WHERE id = :idPlanoTreinoPrincipal")
-    fun getPlanoTreinoPrincipal(idPlanoTreinoPrincipal: Int): Flow<PlanoTreino>
+    @Query("SELECT * FROM planotreino WHERE id = :idPlanoTreino")
+    fun getPlanoTreino(idPlanoTreino: Int): Flow<PlanoTreino>
 
     @Query("SELECT * FROM planotreino")
     fun getPlanosTreino(): Flow<List<PlanoTreino>>

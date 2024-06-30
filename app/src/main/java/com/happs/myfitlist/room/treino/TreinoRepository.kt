@@ -14,7 +14,7 @@ interface TreinoRepository {
     suspend fun removeUser(usuario: Usuario)
 
     suspend fun updatePlanoTreinoPrincipal(usuarioId: Int, planoTreinoId: Int)
-    fun getPlanoTreinoPrincipal(idPlanoTreinoPrincipal: Int): Flow<PlanoTreino>
+    fun getPlanoTreino(idPlanoTreino: Int): Flow<PlanoTreino>
     fun getPlanosTreino(): Flow<List<PlanoTreino>>
     suspend fun addPlanoTreino(planoTreino: PlanoTreino): Long
     suspend fun updatePlanoTreino(planoTreino: PlanoTreino)
