@@ -60,6 +60,7 @@ import com.happs.myfitlist.ui.theme.MyWhite
 import com.happs.myfitlist.ui.theme.MyYellow
 import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
+import com.happs.myfitlist.util.CustomAlertDialog
 import com.happs.myfitlist.util.tela_treino.CustomCardDiaTreino
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.treino.TreinoViewModel
@@ -74,7 +75,6 @@ fun TreinoView(
     var expandedPlanoTreinoList by remember { mutableStateOf(false) }
 
     val listPlanoTreinoState = rememberLazyListState()
-    val listDiaTreinoState = rememberLazyListState()
 
     val usuario = uiState.usuario
 
@@ -116,13 +116,10 @@ fun TreinoView(
             }
         }
 
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(10.dp))
 
         Box {
-            DiasTreinoList(
-                listDiaTreino = uiState.diasComExercicios,
-                listDiaTreinoState = listDiaTreinoState
-            )
+            DiasTreinoList(listDiaTreino = uiState.diasComExercicios)
 
             FloatingActionButton(modifier = Modifier
                 .padding(bottom = 10.dp)
@@ -174,6 +171,22 @@ fun PlanosTreinoList(
     viewModel: TreinoViewModel,
     selecionarPlano: () -> Unit
 ) {
+
+    val openDialog = remember { mutableStateOf(false) }
+    val planoTreinoParaExcluir = remember { mutableStateOf<PlanoTreino?>(null) }
+
+    if (openDialog.value && planoTreinoParaExcluir.value != null) {
+        CustomAlertDialog(
+            onclose = { openDialog.value = false },
+            onConfirm = {
+                planoTreinoParaExcluir.value?.let {
+                    viewModel.excluirPlanoTreino(it)
+                }
+                openDialog.value = false
+            }
+        )
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth(),
@@ -213,26 +226,29 @@ fun PlanosTreinoList(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Row(modifier = Modifier
-                                    .clickable {
-                                        viewModel.atualizarPlanoTreinoPrincipal(
-                                            usuario.id,
-                                            it.id
-                                        )
-                                        selecionarPlano()
-                                    }) {
+                                Row(
+                                    modifier = Modifier
+                                        .clickable {
+                                            viewModel.atualizarPlanoTreinoPrincipal(
+                                                usuario.id,
+                                                it.id
+                                            )
+                                            selecionarPlano()
+                                        },
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
                                     Icon(
                                         tint = MyYellow,
                                         painter = painterResource(id = if (planoTreinoPrincipal.id == it.id) R.drawable.baseline_star_24 else R.drawable.baseline_star_border_24),
                                         contentDescription = "Selecionar como principal",
                                         modifier = Modifier
-                                            .size(30.dp)
+                                            .size(35.dp)
                                             .padding(end = 5.dp)
                                     )
                                     Text(
                                         text = it.nome,
                                         fontFamily = myFontBody,
-                                        fontSize = 15.sp,
+                                        fontSize = 16.sp,
                                         color = MyBlack,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
@@ -240,7 +256,8 @@ fun PlanosTreinoList(
                                 }
                                 Icon(
                                     modifier = Modifier.clickable {
-                                        viewModel.excluirPlanoTreino(it)
+                                        planoTreinoParaExcluir.value = it
+                                        openDialog.value = true
                                     },
                                     tint = MyBlack,
                                     painter = painterResource(id = R.drawable.baseline_close_24),
@@ -341,21 +358,9 @@ fun PlanoTreinoPrincipal(
 @Composable
 fun DiasTreinoList(
     listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>,
-    listDiaTreinoState: LazyListState
 ) {
     if (listDiaTreino.isNotEmpty()) {
-        LazyColumn(state = listDiaTreinoState) {
-            items(listDiaTreino) {
-                CustomCardDiaTreino(
-                    diaTreino = it.first,
-                    exercicioList = it.second,
-                    onClick = {})
-            }
-
-            item {
-                Spacer(modifier = Modifier.height(60.dp))
-            }
-        }
+        CustomCardDiaTreino(listDiaTreino = listDiaTreino)
     } else {
         Column(
             modifier = Modifier.fillMaxSize(),
