@@ -6,9 +6,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.happs.myfitlist.model.treino.DiaTreino
 import com.happs.myfitlist.model.treino.Exercicio
-import com.happs.myfitlist.room.treino.TreinoRepository
+import com.happs.myfitlist.room.TreinoRepository
 import com.happs.myfitlist.state.PlanoTreinoState
-import com.happs.myfitlist.util.cadastro_plano_treino.DiasList
+import com.happs.myfitlist.util.DiasList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -110,6 +110,14 @@ class EditarPlanoViewModel(
         return try {
 
             val state = _editarPlanoState.value
+
+            if (state.nomePlanoTreino.isEmpty()) {
+                throw Exception("Nome do plano não pode ser vazio")
+            }
+
+            if (state.grupoMuscular.any { it.isEmpty() }) {
+                throw Exception("Preencha os campos de grupo muscular")
+            }
 
             val planoTreino = treinoRepository.getPlanoTreino(planoTreinoId).first()
 

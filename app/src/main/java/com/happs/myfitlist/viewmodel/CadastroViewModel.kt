@@ -3,7 +3,7 @@ package com.happs.myfitlist.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.happs.myfitlist.model.usuario.Usuario
-import com.happs.myfitlist.room.treino.TreinoRepository
+import com.happs.myfitlist.room.TreinoRepository
 import com.happs.myfitlist.state.CadastroState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

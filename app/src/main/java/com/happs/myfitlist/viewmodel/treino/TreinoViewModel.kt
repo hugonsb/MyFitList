@@ -3,7 +3,7 @@ package com.happs.myfitlist.viewmodel.treino
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.happs.myfitlist.model.treino.PlanoTreino
-import com.happs.myfitlist.room.treino.TreinoRepository
+import com.happs.myfitlist.room.TreinoRepository
 import com.happs.myfitlist.state.TreinoState
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

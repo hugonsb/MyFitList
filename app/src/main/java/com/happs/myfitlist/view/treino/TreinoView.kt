@@ -42,6 +42,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -61,7 +62,7 @@ import com.happs.myfitlist.ui.theme.MyYellow
 import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.util.CustomAlertDialog
-import com.happs.myfitlist.util.tela_treino.CustomCardDiaTreino
+import com.happs.myfitlist.util.tela_treino.CustomPagerDiaTreino
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.treino.TreinoViewModel
 
@@ -118,7 +119,7 @@ fun TreinoView(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        Box {
+        Box{
             DiasTreinoList(listDiaTreino = uiState.diasComExercicios)
 
             FloatingActionButton(modifier = Modifier
@@ -177,6 +178,8 @@ fun PlanosTreinoList(
 
     if (openDialog.value && planoTreinoParaExcluir.value != null) {
         CustomAlertDialog(
+            title = stringResource(R.string.confirmar),
+            text = stringResource(R.string.tem_certeza_que_deseja_excluir),
             onclose = { openDialog.value = false },
             onConfirm = {
                 planoTreinoParaExcluir.value?.let {
@@ -360,7 +363,7 @@ fun DiasTreinoList(
     listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>,
 ) {
     if (listDiaTreino.isNotEmpty()) {
-        CustomCardDiaTreino(listDiaTreino = listDiaTreino)
+        CustomPagerDiaTreino(listDiaTreino = listDiaTreino)
     } else {
         Column(
             modifier = Modifier.fillMaxSize(),

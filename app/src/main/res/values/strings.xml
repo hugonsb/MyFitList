@@ -1,3 +1,18 @@
 <resources>
     <string name="app_name">MyFitList</string>
+    <string name="tem_certeza_que_deseja_excluir">Tem certeza que deseja excluir?</string>
+    <string name="confirmar">Confirmar</string>
+    <string name="cancelar">Cancelar</string>
+    <string name="voltar">Voltar</string>
+    <string name="deseja_voltar">Deseja voltar?</string>
+    <string name="seus_dados_nao_serao_salvos">Seus dados não serão salvos</string>
+    <string name="as_alteracoes_serao_perdidas">As alterações serão perdidas</string>
+    <string name="criar_plano_de_treino">Criar plano de treino</string>
+    <string name="digite_um_nome_para_o_plano">Digite um nome para o plano</string>
+    <string name="salvar_plano">SALVAR PLANO</string>
+    <string name="informe_o_grupo_muscular">Informe o Grupo muscular</string>
+    <string name="adicionar_exerc_cio">Adicionar exercício</string>
+    <string name="campo_obrigat_rio">Campo obrigatório</string>
+    <string name="repeticoes">Repetições</string>
+    <string name="editar_plano_de_treino">Editar plano de treino</string>
 </resources>

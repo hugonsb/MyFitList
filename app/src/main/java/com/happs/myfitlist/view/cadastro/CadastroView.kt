@@ -1,4 +1,4 @@
-package com.happs.myfitlist.view
+package com.happs.myfitlist.view.cadastro
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

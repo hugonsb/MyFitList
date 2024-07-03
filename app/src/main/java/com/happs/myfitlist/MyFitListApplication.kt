@@ -1,8 +1,8 @@
 package com.happs.myfitlist
 
 import android.app.Application
-import com.happs.myfitlist.room.treino.AppContainer
-import com.happs.myfitlist.room.treino.AppDataContainer
+import com.happs.myfitlist.room.AppContainer
+import com.happs.myfitlist.room.AppDataContainer
 
 class MyFitListApplication : Application() {
 

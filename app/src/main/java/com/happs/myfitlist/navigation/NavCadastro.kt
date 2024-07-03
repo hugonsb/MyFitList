@@ -4,7 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.happs.myfitlist.view.CadastroView
+import com.happs.myfitlist.view.cadastro.CadastroView
 
 @Composable
 fun NavCadastro() {

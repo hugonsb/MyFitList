@@ -1,4 +1,4 @@
-package com.happs.myfitlist.util.cadastro_plano_treino
+package com.happs.myfitlist.util
 
 object DiasList {
     val dias = listOf(

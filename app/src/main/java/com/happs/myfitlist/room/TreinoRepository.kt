@@ -1,4 +1,4 @@
-package com.happs.myfitlist.room.treino
+package com.happs.myfitlist.room
 
 import com.happs.myfitlist.model.treino.DiaTreino
 import com.happs.myfitlist.model.treino.Exercicio

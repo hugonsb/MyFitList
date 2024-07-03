@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModel
 import com.happs.myfitlist.model.treino.DiaTreino
 import com.happs.myfitlist.model.treino.Exercicio
 import com.happs.myfitlist.model.treino.PlanoTreino
-import com.happs.myfitlist.room.treino.TreinoRepository
+import com.happs.myfitlist.room.TreinoRepository
 import com.happs.myfitlist.state.PlanoTreinoState
-import com.happs.myfitlist.util.cadastro_plano_treino.DiasList
+import com.happs.myfitlist.util.DiasList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

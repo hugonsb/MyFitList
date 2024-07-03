@@ -1,4 +1,4 @@
-package com.happs.myfitlist.room.treino
+package com.happs.myfitlist.room
 
 import androidx.room.Dao
 import androidx.room.Delete

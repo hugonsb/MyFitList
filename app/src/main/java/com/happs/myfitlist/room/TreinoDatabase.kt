@@ -1,4 +1,4 @@
-package com.happs.myfitlist.room.treino
+package com.happs.myfitlist.room
 
 import android.content.Context
 import androidx.room.Database
