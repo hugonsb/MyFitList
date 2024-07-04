@@ -16,6 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.happs.myfitlist.R
@@ -23,7 +24,7 @@ import com.happs.myfitlist.ui.theme.MyBlack
 import com.happs.myfitlist.ui.theme.myFontTitle
 
 @Composable
-fun CustomAlertDialog(title: String, text: String, onclose: () -> Unit, onConfirm: () -> Unit) {
+fun CustomAlertDialog(title: String, text: String, textButtomConfirm: String, onclose: () -> Unit, onConfirm: () -> Unit) {
     AlertDialog(
         containerColor = Color.White,
         onDismissRequest = {
@@ -54,6 +55,7 @@ fun CustomAlertDialog(title: String, text: String, onclose: () -> Unit, onConfir
 
                 Text(
                     text,
+                    textAlign = TextAlign.Center,
                     fontSize = 25.sp,
                     color = MyBlack,
                     fontFamily = myFontTitle,
@@ -77,7 +79,7 @@ fun CustomAlertDialog(title: String, text: String, onclose: () -> Unit, onConfir
                         modifier = Modifier.weight(1f)
                     ) {
                         Text(
-                            stringResource(R.string.voltar),
+                            textButtomConfirm,
                             color = Color.Red,
                             fontFamily = myFontTitle,
                             fontSize = 30.sp

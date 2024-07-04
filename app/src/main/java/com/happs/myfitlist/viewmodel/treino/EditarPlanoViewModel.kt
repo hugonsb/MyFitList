@@ -107,8 +107,8 @@ class EditarPlanoViewModel(
     }
 
     suspend fun editarPlanoTreino(planoTreinoId: Int): Pair<Boolean, String> {
-        return try {
 
+        return try {
             val state = _editarPlanoState.value
 
             if (state.nomePlanoTreino.isEmpty()) {
@@ -149,7 +149,6 @@ class EditarPlanoViewModel(
                 }
             }
 
-            _editarPlanoState.update { PlanoTreinoState() } // Reseta o estado após salvar
             Pair(true, "Editado com sucesso")
 
         } catch (e: Exception) {

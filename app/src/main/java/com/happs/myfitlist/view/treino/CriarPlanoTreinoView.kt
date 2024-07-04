@@ -1,6 +1,7 @@
 package com.happs.myfitlist.view.treino
 
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,13 +22,13 @@ import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -39,6 +40,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -47,6 +49,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -58,6 +61,7 @@ import com.happs.myfitlist.ui.theme.MyBlack
 import com.happs.myfitlist.ui.theme.MyRed
 import com.happs.myfitlist.ui.theme.MyWhite
 import com.happs.myfitlist.ui.theme.TextFieldColors
+import com.happs.myfitlist.ui.theme.TextFieldColors.colorsTextFieldsCard
 import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.util.CustomAlertDialog
@@ -89,6 +93,10 @@ fun CriarPlanoTreinoView(
 
     val openDialog = remember { mutableStateOf(false) }
 
+    BackHandler {
+        openDialog.value = true
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -101,6 +109,7 @@ fun CriarPlanoTreinoView(
             CustomAlertDialog(
                 title = stringResource(R.string.deseja_voltar),
                 text = stringResource(R.string.seus_dados_nao_serao_salvos),
+                textButtomConfirm = stringResource(R.string.voltar),
                 onclose = { openDialog.value = false },
                 onConfirm = {
                     if (navController.canGoBack) {
@@ -156,6 +165,8 @@ fun CriarPlanoTreinoView(
             modifier = Modifier
         )
 
+        Spacer(modifier = Modifier.height(10.dp))
+
         Column(
             modifier = Modifier
                 .weight(1f)
@@ -164,7 +175,6 @@ fun CriarPlanoTreinoView(
                 modifier = Modifier
                     .weight(1f)
             ) {
-                Spacer(modifier = Modifier.height(10.dp))
                 HorizontalPager(
                     modifier = Modifier
                         .fillMaxSize()
@@ -225,7 +235,9 @@ fun CustomCardCadastroDiaSemana(
 
     var isGrupoMuscularError by rememberSaveable { mutableStateOf(false) }
 
-    var expandedAdicionarExercicio by remember { mutableStateOf(false) }
+    var enabledButton by remember { mutableStateOf(true) }
+
+    val openDialog = remember { mutableStateOf(false) }
 
     Card(
         modifier = Modifier
@@ -276,7 +288,7 @@ fun CustomCardCadastroDiaSemana(
                     },
                     modifier = Modifier
                         .fillMaxWidth(),
-                    colors = TextFieldColors.colorsTextFieldsCard(),
+                    colors = colorsTextFieldsCard(),
                     textStyle = TextStyle(
                         fontFamily = myFontBody,
                         fontSize = 20.sp,
@@ -299,15 +311,18 @@ fun CustomCardCadastroDiaSemana(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
+                                modifier = Modifier
+                                    .weight(1f),
                                 text = "${exercicio.nome} ${exercicio.numeroSeries}x${exercicio.numeroRepeticoes}",
                                 fontFamily = myFontBody,
                                 fontSize = 15.sp,
                                 color = MyBlack,
                             )
                             Icon(
-                                modifier = Modifier.clickable {
-                                    viewModel.removerExercicio(indiceDia, exercicio)
-                                },
+                                modifier = Modifier
+                                    .clickable {
+                                        viewModel.removerExercicio(indiceDia, exercicio)
+                                    },
                                 tint = MyBlack,
                                 painter = painterResource(id = R.drawable.baseline_close_24),
                                 contentDescription = "Remover exercício",
@@ -316,38 +331,52 @@ fun CustomCardCadastroDiaSemana(
                     }
                 }
 
-                if (expandedAdicionarExercicio) {
-                    CustomCardCadastroExercicio(
-                        indiceDia,
-                        onClickSalvar = { expandedAdicionarExercicio = false },
-                        onClickCancelar = { expandedAdicionarExercicio = false })
-                } else {
-                    OutlinedButton(
-                        onClick = {
-                            expandedAdicionarExercicio = true
+                if (openDialog.value) {
+                    CustomAlertDialogCadastroExercicio(
+                        title = stringResource(R.string.adicionar_exercicio),
+                        dia = indiceDia,
+                        onClickOk = {
+                            openDialog.value = false
+                            enabledButton = true
                         },
-                        colors = ButtonDefaults.buttonColors(containerColor = MyRed),
-                        shape = RoundedCornerShape(10.dp),
-                        modifier = Modifier
-                            .align(Alignment.CenterHorizontally),
-                    ) {
-                        Text(
-                            text = stringResource(R.string.adicionar_exerc_cio),
-                            fontFamily = myFontTitle,
-                            fontSize = 18.sp,
-                            color = MyWhite,
-                        )
-                    }
+                        onClickCancelar = {
+                            openDialog.value = false
+                            enabledButton = true
+                        })
                 }
+
+                OutlinedButton(
+                    onClick = {
+                        enabledButton = false
+                        openDialog.value = true
+                    },
+                    enabled = enabledButton,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MyRed,
+                        disabledContainerColor = MyRed.copy(0.5f)
+                    ),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally),
+                ) {
+                    Text(
+                        text = stringResource(R.string.adicionar_exerc_cio),
+                        fontFamily = myFontTitle,
+                        fontSize = 18.sp,
+                        color = MyWhite,
+                    )
+                }
+
             }
         }
     }
 }
 
 @Composable
-fun CustomCardCadastroExercicio(
+fun CustomAlertDialogCadastroExercicio(
+    title: String,
     dia: Int,
-    onClickSalvar: () -> Unit,
+    onClickOk: () -> Unit,
     onClickCancelar: () -> Unit,
     viewiewModel: CriarPlanoTreinoViewModel = viewModel(
         factory = AppViewModelProvider.Factory
@@ -359,205 +388,208 @@ fun CustomCardCadastroExercicio(
     var isNumeroSeriesError by rememberSaveable { mutableStateOf(false) }
     var isNumeroRepeticoesError by rememberSaveable { mutableStateOf(false) }
 
-    val colorsTextFieldsCard = OutlinedTextFieldDefaults.colors(
-        unfocusedContainerColor = MyRed.copy(0.9f),
-        focusedContainerColor = MyRed.copy(0.6f),
-        errorContainerColor = MyRed.copy(0.9f),
-        focusedTextColor = MyWhite,
-        unfocusedTextColor = MyWhite,
-        unfocusedBorderColor = MyRed.copy(0.5f),
-        focusedBorderColor = MyRed,
-        errorBorderColor = MyBlack,
-        errorTextColor = MyWhite,
-        focusedPlaceholderColor = MyWhite.copy(0.85f),
-        unfocusedPlaceholderColor = MyWhite.copy(0.85f),
-        errorPlaceholderColor = MyWhite.copy(0.85f),
-        cursorColor = MyWhite,
-        errorCursorColor = MyWhite,
-        errorSupportingTextColor = MyBlack,
-    )
-
-    Card(shape = RoundedCornerShape(10.dp)) {
-        Column(
-            modifier = Modifier
-                .background(MyRed.copy(0.15f))
-                .padding(10.dp)
-        ) {
-            OutlinedTextField(
-                value = uiState.nomeExercicio[dia],
-                onValueChange = {
-                    if (it.length <= 100) {
-                        viewiewModel.setNomeExercicio(dia, it)
-                        isNomeExercicioError = false
-                    }
-                },
-                singleLine = true,
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Text,
-                    capitalization = KeyboardCapitalization.Sentences
-                ),
-                isError = isNomeExercicioError,
-                supportingText = { if (isNomeExercicioError) Text(stringResource(R.string.campo_obrigat_rio)) },
-                placeholder = {
-                    Text(
-                        text = "Nome do Exercício",
-                        fontFamily = myFontBody,
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 18.sp,
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth(),
-                colors = colorsTextFieldsCard,
-                textStyle = TextStyle(
-                    fontFamily = myFontBody,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                ),
-                shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
-            )
-
-            Row {
-                val pattern = remember { Regex("^\\d*\$") }
-                OutlinedTextField(
-                    value = uiState.numeroSeries[dia],
-                    onValueChange = {
-                        if (it.matches(pattern)) {
-                            if (it.isNotEmpty()) {
-                                viewiewModel.setNumeroSeries(
-                                    dia, it.toInt().coerceAtMost(15).toString()
-                                )
-                            } else {
-                                viewiewModel.setNumeroSeries(dia, it)
-                            }
-                            isNumeroSeriesError = false
-                        }
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    isError = isNumeroSeriesError,
-                    supportingText = { if (isNumeroSeriesError) Text(stringResource(id = R.string.campo_obrigat_rio)) },
-                    placeholder = {
-                        Text(
-                            text = "Series",
-                            fontFamily = myFontBody,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    colors = colorsTextFieldsCard,
-                    textStyle = TextStyle(
-                        fontFamily = myFontBody,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
-                )
-
-                Spacer(modifier = Modifier.width(10.dp))
-
-                OutlinedTextField(
-                    value = uiState.numeroRepeticoes[dia],
-                    onValueChange = {
-                        if (it.matches(pattern)) {
-                            if (it.isNotEmpty()) {
-                                viewiewModel.setNumeroRepeticoes(
-                                    dia,
-                                    it.toInt().coerceAtMost(40).toString()
-                                )
-                            } else {
-                                viewiewModel.setNumeroRepeticoes(dia, it)
-                            }
-                            isNumeroRepeticoesError = false
-                        }
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    isError = isNumeroRepeticoesError,
-                    supportingText = { if (isNumeroRepeticoesError) Text(stringResource(id = R.string.campo_obrigat_rio)) },
-                    placeholder = {
-                        Text(
-                            text = stringResource(R.string.repeticoes),
-                            fontFamily = myFontBody,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    colors = colorsTextFieldsCard,
-                    textStyle = TextStyle(
-                        fontFamily = myFontBody,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
-                )
-            }
-
-            OutlinedButton(
-                onClick = {
-
-                    val nomeExercicio = uiState.nomeExercicio[dia]
-                    val numeroSeries = uiState.numeroSeries[dia]
-                    val numeroRepeticoes = uiState.numeroRepeticoes[dia]
-
-                    if (nomeExercicio.isNotEmpty() && numeroSeries.isNotEmpty() && numeroRepeticoes.isNotEmpty()) {
-
-                        viewiewModel.adicionarExercicio(
-                            dia,
-                            Exercicio(
-                                nome = nomeExercicio,
-                                numeroSeries = numeroSeries.toInt(),
-                                numeroRepeticoes = numeroRepeticoes.toInt(),
-                                idDiaTreino = -1
-                            )
-                        )
-
-                        viewiewModel.setNomeExercicio(dia, "")
-                        viewiewModel.setNumeroSeries(dia, "")
-                        viewiewModel.setNumeroRepeticoes(dia, "")
-                        onClickSalvar()
-                    } else {
-                        if (nomeExercicio.isEmpty()) {
-                            isNomeExercicioError = true
-                        }
-                        if (numeroSeries.isEmpty()) {
-                            isNumeroSeriesError = true
-                        }
-                        if (numeroRepeticoes.isEmpty()) {
-                            isNumeroRepeticoesError = true
-                        }
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = MyRed),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier.align(Alignment.CenterHorizontally)
-            ) {
-                Text(
-                    text = "OK",
-                    fontFamily = myFontTitle,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MyWhite,
-                )
-            }
-
-            Spacer(modifier = Modifier.height(5.dp))
-
+    AlertDialog(
+        containerColor = Color.White,
+        onDismissRequest = {
+            onClickCancelar()
+        },
+        title = {
             Text(
-                text = stringResource(id = R.string.cancelar), fontFamily = myFontTitle,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.Bold,
+                title,
+                fontSize = 35.sp,
                 color = MyBlack,
-                modifier = Modifier
-                    .align(Alignment.CenterHorizontally)
-                    .clickable { onClickCancelar() }
+                textAlign = TextAlign.Center,
+                fontFamily = myFontTitle,
+                modifier = Modifier.fillMaxWidth()
             )
-        }
-    }
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                OutlinedTextField(
+                    value = uiState.nomeExercicio[dia],
+                    onValueChange = {
+                        if (it.length <= 100) {
+                            viewiewModel.setNomeExercicio(dia, it)
+                            isNomeExercicioError = false
+                        }
+                    },
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Text,
+                        capitalization = KeyboardCapitalization.Sentences
+                    ),
+                    isError = isNomeExercicioError,
+                    supportingText = { if (isNomeExercicioError) Text(stringResource(R.string.campo_obrigat_rio)) },
+                    placeholder = {
+                        Text(
+                            text = stringResource(R.string.nome_do_exercicio),
+                            fontFamily = myFontBody,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = colorsTextFieldsCard(),
+                    textStyle = TextStyle(
+                        fontFamily = myFontBody,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
+                )
+
+                Row {
+                    val pattern = remember { Regex("^\\d*\$") }
+                    OutlinedTextField(
+                        value = uiState.numeroSeries[dia],
+                        onValueChange = {
+                            if (it.matches(pattern)) {
+                                if (it.isNotEmpty()) {
+                                    viewiewModel.setNumeroSeries(
+                                        dia, it.toInt().coerceAtMost(15).toString()
+                                    )
+                                } else {
+                                    viewiewModel.setNumeroSeries(dia, it)
+                                }
+                                isNumeroSeriesError = false
+                            }
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                        isError = isNumeroSeriesError,
+                        supportingText = { if (isNumeroSeriesError) Text(stringResource(id = R.string.campo_obrigat_rio)) },
+                        placeholder = {
+                            Text(
+                                text = stringResource(R.string.series),
+                                fontFamily = myFontBody,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        colors = colorsTextFieldsCard(),
+                        textStyle = TextStyle(
+                            fontFamily = myFontBody,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                        shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
+                    )
+
+                    Spacer(modifier = Modifier.width(10.dp))
+
+                    OutlinedTextField(
+                        value = uiState.numeroRepeticoes[dia],
+                        onValueChange = {
+                            if (it.matches(pattern)) {
+                                if (it.isNotEmpty()) {
+                                    viewiewModel.setNumeroRepeticoes(
+                                        dia,
+                                        it.toInt().coerceAtMost(40).toString()
+                                    )
+                                } else {
+                                    viewiewModel.setNumeroRepeticoes(dia, it)
+                                }
+                                isNumeroRepeticoesError = false
+                            }
+                        },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                        isError = isNumeroRepeticoesError,
+                        supportingText = { if (isNumeroRepeticoesError) Text(stringResource(id = R.string.campo_obrigat_rio)) },
+                        placeholder = {
+                            Text(
+                                text = stringResource(R.string.repeticoes),
+                                fontFamily = myFontBody,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 18.sp,
+                            )
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        colors = colorsTextFieldsCard(),
+                        textStyle = TextStyle(
+                            fontFamily = myFontBody,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                        ),
+                        shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        val nomeExercicio = uiState.nomeExercicio[dia]
+                        val numeroSeries = uiState.numeroSeries[dia]
+                        val numeroRepeticoes = uiState.numeroRepeticoes[dia]
+
+                        if (nomeExercicio.isNotEmpty() && numeroSeries.isNotEmpty() && numeroRepeticoes.isNotEmpty()) {
+
+                            viewiewModel.adicionarExercicio(
+                                dia,
+                                Exercicio(
+                                    nome = nomeExercicio,
+                                    numeroSeries = numeroSeries.toInt(),
+                                    numeroRepeticoes = numeroRepeticoes.toInt(),
+                                    idDiaTreino = -1
+                                )
+                            )
+
+                            viewiewModel.setNomeExercicio(dia, "")
+                            viewiewModel.setNumeroSeries(dia, "")
+                            viewiewModel.setNumeroRepeticoes(dia, "")
+                            onClickOk()
+                        } else {
+                            if (nomeExercicio.isEmpty()) {
+                                isNomeExercicioError = true
+                            }
+                            if (numeroSeries.isEmpty()) {
+                                isNumeroSeriesError = true
+                            }
+                            if (numeroRepeticoes.isEmpty()) {
+                                isNumeroRepeticoesError = true
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MyRed),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .width(120.dp).height(50.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.ok),
+                        fontFamily = myFontTitle,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MyWhite,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                Text(
+                    text = stringResource(id = R.string.cancelar), fontFamily = myFontTitle,
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MyBlack,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .clickable { onClickCancelar() }
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {},
+    )
 }

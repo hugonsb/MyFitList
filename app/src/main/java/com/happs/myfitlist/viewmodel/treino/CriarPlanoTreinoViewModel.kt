@@ -122,8 +122,6 @@ class CriarPlanoTreinoViewModel(
                 planoTreinoId = planoTreinoId
             )
 
-            // Resetar o estado após salvar
-            _criarPlanoTreinoState.update { PlanoTreinoState() }
             Pair(true, "Salvo com sucesso") // Retorna sucesso com mensagem
         } catch (e: Exception) {
             Log.e("CriarPlanoTreino", "Erro: ${e.message}")

@@ -13,6 +13,11 @@
     <string name="informe_o_grupo_muscular">Informe o Grupo muscular</string>
     <string name="adicionar_exerc_cio">Adicionar exercício</string>
     <string name="campo_obrigat_rio">Campo obrigatório</string>
-    <string name="repeticoes">Repetições</string>
+    <string name="repeticoes">Reps.</string>
     <string name="editar_plano_de_treino">Editar plano de treino</string>
+    <string name="series">Series</string>
+    <string name="ok">OK</string>
+    <string name="nome_do_exercicio">Nome do Exercício</string>
+    <string name="adicionar_exercicio">Adicionar Exercício</string>
+    <string name="toque_em_voltar_sair">Toque em voltar mais uma vez para sair</string>
 </resources>

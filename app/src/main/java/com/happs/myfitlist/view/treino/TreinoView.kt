@@ -1,8 +1,15 @@
 package com.happs.myfitlist.view.treino
 
+import android.app.Activity
+import android.os.Handler
+import android.os.Looper
+import android.widget.Toast
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -20,8 +27,12 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
@@ -34,6 +45,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +53,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -62,7 +76,9 @@ import com.happs.myfitlist.ui.theme.MyYellow
 import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.util.CustomAlertDialog
-import com.happs.myfitlist.util.tela_treino.CustomPagerDiaTreino
+import com.happs.myfitlist.util.DiasList
+import com.happs.myfitlist.util.func.getCurrentDayOfWeekIndex
+import com.happs.myfitlist.util.pager.PageIndicator
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.treino.TreinoViewModel
 
@@ -71,6 +87,42 @@ fun TreinoView(
     navController: NavHostController,
     viewModel: TreinoViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+
+    val ctx = LocalContext.current
+
+    //funcionalidade "toque novamente pra sair"
+    var backPressedOnce = false
+    val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
+    val backCallback = remember {
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // Fecha o aplicativo ao clicar em voltar em menos de 2s
+                if (backPressedOnce) {
+                    (ctx as? Activity)?.finish()
+                } else {
+                    backPressedOnce = true
+                    Toast.makeText(
+                        ctx,
+                        R.string.toque_em_voltar_sair,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    Handler(Looper.getMainLooper()).postDelayed(
+                        { backPressedOnce = false },
+                        2000
+                    )
+                }
+            }
+        }
+    }
+
+    // callback para interceptar o evento de voltar
+    DisposableEffect(onBackPressedDispatcher) {
+        onBackPressedDispatcher?.onBackPressedDispatcher?.addCallback(backCallback)
+        onDispose {
+            backCallback.remove()
+        }
+    }
+
     val uiState by viewModel.treinoState.collectAsState()
 
     var expandedPlanoTreinoList by remember { mutableStateOf(false) }
@@ -117,9 +169,8 @@ fun TreinoView(
             }
         }
 
-        Spacer(modifier = Modifier.height(10.dp))
+        Box {
 
-        Box{
             DiasTreinoList(listDiaTreino = uiState.diasComExercicios)
 
             FloatingActionButton(modifier = Modifier
@@ -180,6 +231,7 @@ fun PlanosTreinoList(
         CustomAlertDialog(
             title = stringResource(R.string.confirmar),
             text = stringResource(R.string.tem_certeza_que_deseja_excluir),
+            textButtomConfirm = stringResource(R.string.confirmar),
             onclose = { openDialog.value = false },
             onConfirm = {
                 planoTreinoParaExcluir.value?.let {
@@ -362,7 +414,7 @@ fun PlanoTreinoPrincipal(
 fun DiasTreinoList(
     listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>,
 ) {
-    if (listDiaTreino.isNotEmpty()) {
+    if (listDiaTreino.size == 7) {
         CustomPagerDiaTreino(listDiaTreino = listDiaTreino)
     } else {
         Column(
@@ -378,6 +430,125 @@ fun DiasTreinoList(
                 fontWeight = FontWeight.Bold,
                 color = MyWhite,
             )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun CustomPagerDiaTreino(listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>) {
+
+    val pagerState = rememberPagerState(
+        pageCount = { DiasList.dias.size },
+        initialPage = getCurrentDayOfWeekIndex()
+    )
+
+    val scrollState = rememberScrollState()
+
+    Column {
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        PageIndicator(
+            pageCount = DiasList.dias.size,
+            currentPage = pagerState.currentPage,
+            pagerState = pagerState,
+            modifier = Modifier
+        )
+
+        Spacer(modifier = Modifier.height(5.dp))
+
+        Column(
+            modifier = Modifier
+                .weight(1f)
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+            ) {
+                HorizontalPager(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(scrollState)
+                        .padding(bottom = 75.dp),
+                    state = pagerState,
+                    verticalAlignment = Alignment.Top,
+                    key = { pageIndex -> pageIndex }
+                ) { currentPage ->
+                    Card(
+                        shape = CutCornerShape(topStart = 15.dp, bottomEnd = 15.dp)
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .background(MyWhite)
+                                .fillMaxWidth()
+                                .padding(10.dp)
+                        ) {
+                            Text(
+                                text = listDiaTreino[currentPage].first.dia,
+                                fontFamily = myFontTitle,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MyBlack,
+                            )
+                            Text(
+                                text = listDiaTreino[currentPage].first.grupoMuscular,
+                                fontFamily = myFontTitle,
+                                fontSize = 29.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MyRed,
+                            )
+
+                            Spacer(modifier = Modifier.height(5.dp))
+
+                            for ((index, exercicio) in listDiaTreino[currentPage].second.withIndex()) {
+                                Row(
+                                    modifier = Modifier.padding(vertical = 6.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        tint = MyRed,
+                                        painter = painterResource(id = R.drawable.dumbbell_icon),
+                                        contentDescription = "Imagem do exercício",
+                                        modifier = Modifier.size(40.dp)
+                                    )
+
+                                    Spacer(modifier = Modifier.width(8.dp))
+
+                                    Column {
+                                        Text(
+                                            text = exercicio.nome,
+                                            fontFamily = myFontBody,
+                                            fontSize = 20.sp,
+                                            lineHeight = 19.sp,
+                                            color = MyBlack,
+                                        )
+                                        Text(
+                                            text = "SÉRIES: ${exercicio.numeroSeries} REPS.: ${exercicio.numeroRepeticoes}",
+                                            fontFamily = myFontBody,
+                                            fontSize = 12.sp,
+                                            lineHeight = 19.sp,
+                                            color = MyBlack,
+                                        )
+                                    }
+                                }
+
+                                if (index < listDiaTreino[currentPage].second.size - 1) {
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                    Spacer(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(0.6.dp)
+                                            .background(Color.Gray)
+                                    )
+                                    Spacer(modifier = Modifier.height(10.dp))
+                                }
+                            }
+
+                        }
+                    }
+                }
+            }
         }
     }
 }
