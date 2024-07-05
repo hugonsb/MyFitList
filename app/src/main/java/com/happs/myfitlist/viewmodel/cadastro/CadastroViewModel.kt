@@ -1,4 +1,4 @@
-package com.happs.myfitlist.viewmodel
+package com.happs.myfitlist.viewmodel.cadastro
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

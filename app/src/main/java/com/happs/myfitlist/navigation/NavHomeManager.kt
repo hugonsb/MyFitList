@@ -8,7 +8,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.happs.myfitlist.view.ConfiguracoesView
-import com.happs.myfitlist.view.DietaView
 
 @Composable
 fun NavHomeManager() {
@@ -20,7 +19,7 @@ fun NavHomeManager() {
             Modifier.padding(innerPadding)
         ) {
             composable("nav_treino") { NavTreino() }
-            composable("dieta") { DietaView() }
+            composable("dieta") { NavDieta() }
             composable("configuracoes") { ConfiguracoesView() }
         }
     }

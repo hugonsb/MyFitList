@@ -7,7 +7,7 @@ import androidx.room.PrimaryKey
 
 // essa tabela vai guardar os dias de treino e os grupos musculares
 @Entity(
-    "diaTreino",
+    "diatreino",
     foreignKeys = [ForeignKey(
         entity = PlanoTreino::class,
         parentColumns = ["id"],

@@ -15,5 +15,7 @@ data class Usuario(
     @ColumnInfo("peso")
     val peso: Float,
     @ColumnInfo("idPlanoTreinoPrincipal")
-    val idPlanoTreinoPrincipal: Int
+    val idPlanoTreinoPrincipal: Int,
+    @ColumnInfo("idPlanoDietaPrincipal")
+    val idPlanoDietaPrincipal: Int
 )

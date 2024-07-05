@@ -1,5 +1,8 @@
 package com.happs.myfitlist.room
 
+import com.happs.myfitlist.model.dieta.DiaDieta
+import com.happs.myfitlist.model.dieta.PlanoDieta
+import com.happs.myfitlist.model.dieta.Refeicao
 import com.happs.myfitlist.model.treino.DiaTreino
 import com.happs.myfitlist.model.treino.Exercicio
 import com.happs.myfitlist.model.treino.PlanoTreino
@@ -15,6 +18,7 @@ class OfflineTreinoRepository(private val treinoDao: TreinoDao) : TreinoReposito
     override suspend fun updateUser(usuario: Usuario) = treinoDao.updateUser(usuario)
 
     override suspend fun removeUser(usuario: Usuario) = treinoDao.removeUser(usuario)
+
     override suspend fun updatePlanoTreinoPrincipal(usuarioId: Int, planoTreinoId: Int) =
         treinoDao.updatePlanoTreinoPrincipal(usuarioId, planoTreinoId)
 
@@ -54,4 +58,39 @@ class OfflineTreinoRepository(private val treinoDao: TreinoDao) : TreinoReposito
 
     override suspend fun removeExercicio(exercicio: Exercicio) =
         treinoDao.removeExercicio(exercicio)
+
+    override suspend fun updatePlanoDietaPrincipal(usuarioId: Int, planoDietaId: Int) =
+        treinoDao.updatePlanoDietaPrincipal(usuarioId, planoDietaId)
+
+    override fun getPlanoDieta(idPlanoDieta: Int): Flow<PlanoDieta> =
+        treinoDao.getPlanoDieta(idPlanoDieta)
+
+    override fun getPlanosDieta(): Flow<List<PlanoDieta>> = treinoDao.getPlanosDieta()
+
+    override suspend fun addPlanoDieta(planoDieta: PlanoDieta): Long =
+        treinoDao.addPlanoDieta(planoDieta)
+
+    override suspend fun updatePlanoDieta(planoDieta: PlanoDieta) =
+        treinoDao.updatePlanoDieta(planoDieta)
+
+    override suspend fun removePlanoDieta(planoDieta: PlanoDieta) =
+        treinoDao.removePlanoDieta(planoDieta)
+
+    override fun getDiasDieta(idPlanoDieta: Int): Flow<List<DiaDieta>> =
+        treinoDao.getDiasDieta(idPlanoDieta)
+
+    override suspend fun addDiaDieta(diaDieta: DiaDieta): Long = treinoDao.addDiaDieta(diaDieta)
+
+    override suspend fun updateDiaDieta(diaDieta: DiaDieta) = treinoDao.updateDiaDieta(diaDieta)
+
+    override suspend fun removeDiaDieta(diaDieta: DiaDieta) = treinoDao.removeDiaDieta(diaDieta)
+
+    override fun getRefeicoes(idDiaDieta: Int): Flow<List<Refeicao>> =
+        treinoDao.getRefeicoes(idDiaDieta)
+
+    override suspend fun addRefeicao(refeicao: Refeicao) = treinoDao.addRefeicao(refeicao)
+
+    override suspend fun updateRefeicao(refeicao: Refeicao) = treinoDao.updateRefeicao(refeicao)
+
+    override suspend fun removeRefeicao(refeicao: Refeicao) = treinoDao.removeRefeicao(refeicao)
 }

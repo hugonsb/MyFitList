@@ -6,6 +6,9 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.happs.myfitlist.MyFitListApplication
+import com.happs.myfitlist.viewmodel.cadastro.CadastroViewModel
+import com.happs.myfitlist.viewmodel.dieta.CriarPlanoDietaViewModel
+import com.happs.myfitlist.viewmodel.dieta.DietaViewModel
 import com.happs.myfitlist.viewmodel.treino.CriarPlanoTreinoViewModel
 import com.happs.myfitlist.viewmodel.treino.EditarPlanoViewModel
 import com.happs.myfitlist.viewmodel.treino.TreinoViewModel
@@ -24,6 +27,12 @@ object AppViewModelProvider {
         initializer {
             val savedStateHandle = createSavedStateHandle()
             EditarPlanoViewModel(myFitList().container.treinoRepository, savedStateHandle)
+        }
+        initializer {
+            DietaViewModel(myFitList().container.treinoRepository)
+        }
+        initializer {
+            CriarPlanoDietaViewModel(myFitList().container.treinoRepository)
         }
     }
 }

@@ -46,7 +46,7 @@ import com.happs.myfitlist.ui.theme.MyWhite
 import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
-import com.happs.myfitlist.viewmodel.CadastroViewModel
+import com.happs.myfitlist.viewmodel.cadastro.CadastroViewModel
 import kotlinx.coroutines.launch
 
 @Composable
@@ -280,7 +280,8 @@ fun ContentCadastro(cadastroViewModel: CadastroViewModel) {
                             nome = nome,
                             idade = idade.toByteOrNull() ?: -1,
                             peso = peso.toFloatOrNull() ?: -1f,
-                            idPlanoTreinoPrincipal = -1
+                            idPlanoTreinoPrincipal = -1,
+                            idPlanoDietaPrincipal = -1
                         )
                     coroutineScope.launch {
                         cadastroViewModel.addUser(usuario)

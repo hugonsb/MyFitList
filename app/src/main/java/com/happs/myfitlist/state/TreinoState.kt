@@ -10,7 +10,8 @@ data class TreinoState(
         nome = "",
         idade = 0,
         peso = 0.0f,
-        idPlanoTreinoPrincipal = -1
+        idPlanoTreinoPrincipal = -1,
+        idPlanoDietaPrincipal = -1,
     ),
     val planoTreinoPrincipal: PlanoTreino = PlanoTreino(nome = "", idUsuario = -1),
     val listaPlanosTreino: List<PlanoTreino> = emptyList(),

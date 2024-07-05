@@ -1,4 +1,4 @@
-package com.happs.myfitlist.view.treino
+package com.happs.myfitlist.view.dieta
 
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
@@ -56,7 +56,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.happs.myfitlist.R
-import com.happs.myfitlist.model.treino.Exercicio
+import com.happs.myfitlist.model.dieta.Refeicao
 import com.happs.myfitlist.navigation.canGoBack
 import com.happs.myfitlist.ui.theme.MyBlack
 import com.happs.myfitlist.ui.theme.MyRed
@@ -70,20 +70,20 @@ import com.happs.myfitlist.util.CustomTopAppBar
 import com.happs.myfitlist.util.DiasList
 import com.happs.myfitlist.util.pager.PageIndicator
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
-import com.happs.myfitlist.viewmodel.treino.CriarPlanoTreinoViewModel
+import com.happs.myfitlist.viewmodel.dieta.CriarPlanoDietaViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CriarPlanoTreinoView(
+fun CriarPlanoAlimentarView(
     navController: NavHostController,
-    viewModel: CriarPlanoTreinoViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    viewModel: CriarPlanoDietaViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
 
     val coroutineScope = rememberCoroutineScope()
-    val uiState by viewModel.criarPlanoTreinoState.collectAsState()
+    val uiState by viewModel.criarPlanoDietaState.collectAsState()
 
-    var isNomePlanoTreinoError by rememberSaveable { mutableStateOf(false) }
+    var isNomePlanoDietaError by rememberSaveable { mutableStateOf(false) }
 
     var enabledButton by remember { mutableStateOf(true) }
 
@@ -114,7 +114,7 @@ fun CriarPlanoTreinoView(
                 onclose = { openDialog.value = false },
                 onConfirm = {
                     if (navController.canGoBack) {
-                        navController.popBackStack("treino", false)
+                        navController.popBackStack("dieta", false)
                     }
                     openDialog.value = false
                 }
@@ -123,14 +123,14 @@ fun CriarPlanoTreinoView(
 
         CustomTopAppBar(onBackPressed = {
             openDialog.value = true
-        }, barTitle = stringResource(R.string.criar_plano_de_treino))
+        }, barTitle = "Criar plano alimentar")
 
         OutlinedTextField(
-            value = uiState.nomePlanoTreino,
+            value = uiState.nomePlanoDieta,
             onValueChange = {
                 if (it.length <= 100) {
-                    viewModel.setNomePlanoTreino(it)
-                    isNomePlanoTreinoError = false
+                    viewModel.setNomePlanoDieta(it)
+                    isNomePlanoDietaError = false
                 }
             },
             singleLine = true,
@@ -138,8 +138,8 @@ fun CriarPlanoTreinoView(
                 keyboardType = KeyboardType.Text,
                 capitalization = KeyboardCapitalization.Sentences
             ),
-            isError = isNomePlanoTreinoError,
-            supportingText = { if (isNomePlanoTreinoError) Text(stringResource(R.string.digite_um_nome_para_o_plano)) },
+            isError = isNomePlanoDietaError,
+            supportingText = { if (isNomePlanoDietaError) Text(stringResource(R.string.digite_um_nome_para_o_plano)) },
             placeholder = {
                 Text(
                     text = "Nome do plano",
@@ -184,7 +184,7 @@ fun CriarPlanoTreinoView(
                     verticalAlignment = Alignment.Top,
                     key = { pageIndex -> pageIndex }
                 ) { currentPage ->
-                    CustomCardCadastroDiaSemanaTreino(currentPage)
+                    CustomCardCadastroDiaSemanaDieta(currentPage)
                 }
             }
         }
@@ -194,9 +194,9 @@ fun CriarPlanoTreinoView(
                 onClick = {
                     coroutineScope.launch {
                         enabledButton = false
-                        val (success, message) = viewModel.savePlanoTreino()
+                        val (success, message) = viewModel.savePlanoDieta()
                         if (success) {
-                            navController.popBackStack("treino", false)
+                            navController.popBackStack("dieta", false)
                         } else {
                             enabledButton = true
                         }
@@ -223,18 +223,16 @@ fun CriarPlanoTreinoView(
 }
 
 @Composable
-fun CustomCardCadastroDiaSemanaTreino(
+fun CustomCardCadastroDiaSemanaDieta(
     indiceDia: Int,
-    viewModel: CriarPlanoTreinoViewModel = viewModel(
+    viewModel: CriarPlanoDietaViewModel = viewModel(
         factory = AppViewModelProvider.Factory
     )
 ) {
 
     LocalFocusManager.current.clearFocus()
 
-    val uiState by viewModel.criarPlanoTreinoState.collectAsState()
-
-    var isGrupoMuscularError by rememberSaveable { mutableStateOf(false) }
+    val uiState by viewModel.criarPlanoDietaState.collectAsState()
 
     var enabledButton by remember { mutableStateOf(true) }
 
@@ -263,131 +261,103 @@ fun CustomCardCadastroDiaSemanaTreino(
                 color = MyBlack,
             )
 
-            Column {
-                OutlinedTextField(
-                    value = uiState.grupoMuscular[indiceDia],
-                    onValueChange = {
-                        if (it.length <= 100) {
-                            viewModel.setGrupoMuscular(indiceDia, it)
-                            isGrupoMuscularError = false
-                        }
-                    },
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Text,
-                        capitalization = KeyboardCapitalization.Sentences
-                    ),
-                    isError = isGrupoMuscularError,
-                    supportingText = { if (isGrupoMuscularError) Text(stringResource(R.string.informe_o_grupo_muscular)) },
-                    placeholder = {
-                        Text(
-                            text = "Grupo muscular",
-                            fontFamily = myFontBody,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 18.sp,
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    colors = colorsTextFieldsCard(),
-                    textStyle = TextStyle(
-                        fontFamily = myFontBody,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                    ),
-                    shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
-                )
 
-                uiState.exerciciosList[indiceDia].forEach { exercicio ->
-                    Card(
-                        modifier = Modifier.padding(bottom = 10.dp),
-                        shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp)
+            uiState.refeicoesList[indiceDia].forEach { refeicao ->
+                Card(
+                    modifier = Modifier.padding(bottom = 10.dp),
+                    shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .background(MaterialTheme.colorScheme.primary.copy(0.5f))
+                            .padding(8.dp)
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(
-                            modifier = Modifier
-                                .background(MaterialTheme.colorScheme.primary.copy(0.5f))
-                                .padding(8.dp)
-                                .fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+                        Column {
                             Text(
-                                modifier = Modifier
-                                    .weight(1f),
-                                text = "${exercicio.nome} ${exercicio.numeroSeries}x${exercicio.numeroRepeticoes}",
+                                text = "${refeicao.tipo}:",
+                                fontFamily = myFontBody,
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MyWhite,
+                            )
+                            Text(
+                                text = refeicao.detalhes,
                                 fontFamily = myFontBody,
                                 fontSize = 15.sp,
                                 color = MyWhite,
                             )
-                            Icon(
-                                modifier = Modifier
-                                    .clickable {
-                                        viewModel.removerExercicio(indiceDia, exercicio)
-                                    },
-                                tint = MyWhite,
-                                painter = painterResource(id = R.drawable.baseline_close_24),
-                                contentDescription = "Remover exercício",
-                            )
                         }
+                        Icon(
+                            modifier = Modifier
+                                .clickable {
+                                    viewModel.removerRefeicao(indiceDia, refeicao)
+                                },
+                            tint = MyWhite,
+                            painter = painterResource(id = R.drawable.baseline_close_24),
+                            contentDescription = "Remover exercício",
+                        )
                     }
                 }
-
-                if (openDialog.value) {
-                    CustomAlertDialogCadastroExercicio(
-                        title = stringResource(R.string.adicionar_exercicio),
-                        dia = indiceDia,
-                        onClickOk = {
-                            openDialog.value = false
-                            enabledButton = true
-                        },
-                        onClickCancelar = {
-                            openDialog.value = false
-                            enabledButton = true
-                        })
-                }
-
-                OutlinedButton(
-                    onClick = {
-                        enabledButton = false
-                        openDialog.value = true
-                    },
-                    enabled = enabledButton,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MyRed,
-                        disabledContainerColor = MyRed.copy(0.5f)
-                    ),
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier
-                        .align(Alignment.CenterHorizontally),
-                ) {
-                    Text(
-                        text = stringResource(R.string.adicionar_exerc_cio),
-                        fontFamily = myFontTitle,
-                        fontSize = 18.sp,
-                        color = MyWhite,
-                    )
-                }
-
             }
+
+            if (openDialog.value) {
+                CustomAlertDialogCadastroRefeicao(
+                    title = "Adicionar Refeição",
+                    dia = indiceDia,
+                    onClickOk = {
+                        openDialog.value = false
+                        enabledButton = true
+                    },
+                    onClickCancelar = {
+                        openDialog.value = false
+                        enabledButton = true
+                    })
+            }
+
+            OutlinedButton(
+                onClick = {
+                    enabledButton = false
+                    openDialog.value = true
+                },
+                enabled = enabledButton,
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MyRed,
+                    disabledContainerColor = MyRed.copy(0.5f)
+                ),
+                shape = RoundedCornerShape(10.dp),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally),
+            ) {
+                Text(
+                    text = "Adicionar refeição",
+                    fontFamily = myFontTitle,
+                    fontSize = 18.sp,
+                    color = MyWhite,
+                )
+            }
+
         }
     }
 }
 
+
 @Composable
-fun CustomAlertDialogCadastroExercicio(
+fun CustomAlertDialogCadastroRefeicao(
     title: String,
     dia: Int,
     onClickOk: () -> Unit,
     onClickCancelar: () -> Unit,
-    viewiewModel: CriarPlanoTreinoViewModel = viewModel(
+    viewiewModel: CriarPlanoDietaViewModel = viewModel(
         factory = AppViewModelProvider.Factory
     )
 ) {
-    val uiState by viewiewModel.criarPlanoTreinoState.collectAsState()
+    val uiState by viewiewModel.criarPlanoDietaState.collectAsState()
 
-    var isNomeExercicioError by rememberSaveable { mutableStateOf(false) }
-    var isNumeroSeriesError by rememberSaveable { mutableStateOf(false) }
-    var isNumeroRepeticoesError by rememberSaveable { mutableStateOf(false) }
+    var isTipoRefeicaoError by rememberSaveable { mutableStateOf(false) }
+    var isDetalhesRefeicaoError by rememberSaveable { mutableStateOf(false) }
 
     AlertDialog(
         containerColor = Color.White,
@@ -411,11 +381,11 @@ fun CustomAlertDialogCadastroExercicio(
                 verticalArrangement = Arrangement.Center
             ) {
                 OutlinedTextField(
-                    value = uiState.nomeExercicio[dia],
+                    value = uiState.tipoRefeicao[dia],
                     onValueChange = {
                         if (it.length <= 100) {
-                            viewiewModel.setNomeExercicio(dia, it)
-                            isNomeExercicioError = false
+                            viewiewModel.setTipoRefeicao(dia, it)
+                            isTipoRefeicaoError = false
                         }
                     },
                     singleLine = true,
@@ -423,11 +393,11 @@ fun CustomAlertDialogCadastroExercicio(
                         keyboardType = KeyboardType.Text,
                         capitalization = KeyboardCapitalization.Sentences
                     ),
-                    isError = isNomeExercicioError,
-                    supportingText = { if (isNomeExercicioError) Text(stringResource(R.string.campo_obrigat_rio)) },
+                    isError = isTipoRefeicaoError,
+                    supportingText = { if (isTipoRefeicaoError) Text(stringResource(R.string.campo_obrigat_rio)) },
                     placeholder = {
                         Text(
-                            text = stringResource(R.string.nome_do_exercicio),
+                            text = "Tipo (Almoço, Jantar, etc)",
                             fontFamily = myFontBody,
                             fontWeight = FontWeight.Bold,
                             fontSize = 18.sp,
@@ -444,121 +414,67 @@ fun CustomAlertDialogCadastroExercicio(
                     shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
                 )
 
-                Row {
-                    val pattern = remember { Regex("^\\d*\$") }
-                    OutlinedTextField(
-                        value = uiState.numeroSeries[dia],
-                        onValueChange = {
-                            if (it.matches(pattern)) {
-                                if (it.isNotEmpty()) {
-                                    viewiewModel.setNumeroSeries(
-                                        dia, it.toInt().coerceAtMost(15).toString()
-                                    )
-                                } else {
-                                    viewiewModel.setNumeroSeries(dia, it)
-                                }
-                                isNumeroSeriesError = false
-                            }
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                        isError = isNumeroSeriesError,
-                        supportingText = { if (isNumeroSeriesError) Text(stringResource(id = R.string.campo_obrigat_rio)) },
-                        placeholder = {
-                            Text(
-                                text = stringResource(R.string.series),
-                                fontFamily = myFontBody,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                            )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        colors = colorsTextFieldsCard(),
-                        textStyle = TextStyle(
+                OutlinedTextField(
+                    value = uiState.detalhesRefeicao[dia],
+                    onValueChange = {
+                        if (it.length <= 200) {
+                            viewiewModel.setDetalhesRefeicao(dia, it)
+                            isDetalhesRefeicaoError = false
+                        }
+                    },
+                    singleLine = false,
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Text,
+                        capitalization = KeyboardCapitalization.Sentences
+                    ),
+                    isError = isDetalhesRefeicaoError,
+                    supportingText = { if (isDetalhesRefeicaoError) Text(stringResource(R.string.campo_obrigat_rio)) },
+                    placeholder = {
+                        Text(
+                            text = "Detalhes da refeição",
                             fontFamily = myFontBody,
-                            fontSize = 20.sp,
                             fontWeight = FontWeight.Bold,
-                        ),
-                        shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
-                    )
-
-                    Spacer(modifier = Modifier.width(10.dp))
-
-                    OutlinedTextField(
-                        value = uiState.numeroRepeticoes[dia],
-                        onValueChange = {
-                            if (it.matches(pattern)) {
-                                if (it.isNotEmpty()) {
-                                    viewiewModel.setNumeroRepeticoes(
-                                        dia,
-                                        it.toInt().coerceAtMost(40).toString()
-                                    )
-                                } else {
-                                    viewiewModel.setNumeroRepeticoes(dia, it)
-                                }
-                                isNumeroRepeticoesError = false
-                            }
-                        },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                        isError = isNumeroRepeticoesError,
-                        supportingText = { if (isNumeroRepeticoesError) Text(stringResource(id = R.string.campo_obrigat_rio)) },
-                        placeholder = {
-                            Text(
-                                text = stringResource(R.string.repeticoes),
-                                fontFamily = myFontBody,
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 18.sp,
-                            )
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        colors = colorsTextFieldsCard(),
-                        textStyle = TextStyle(
-                            fontFamily = myFontBody,
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                        ),
-                        shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
-                    )
-                }
+                            fontSize = 18.sp,
+                        )
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = colorsTextFieldsCard(),
+                    textStyle = TextStyle(
+                        fontFamily = myFontBody,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                    ),
+                    shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
+                )
 
                 Spacer(modifier = Modifier.height(15.dp))
 
                 OutlinedButton(
                     onClick = {
-                        val nomeExercicio = uiState.nomeExercicio[dia]
-                        val numeroSeries = uiState.numeroSeries[dia]
-                        val numeroRepeticoes = uiState.numeroRepeticoes[dia]
+                        val tipoRefeicao = uiState.tipoRefeicao[dia]
+                        val detalhesRefeicao = uiState.detalhesRefeicao[dia]
 
-                        if (nomeExercicio.isNotEmpty() && numeroSeries.isNotEmpty() && numeroRepeticoes.isNotEmpty()) {
+                        if (tipoRefeicao.isNotEmpty() && detalhesRefeicao.isNotEmpty()) {
 
-                            viewiewModel.adicionarExercicio(
+                            viewiewModel.adicionarRefeicao(
                                 dia,
-                                Exercicio(
-                                    nome = nomeExercicio,
-                                    numeroSeries = numeroSeries.toInt(),
-                                    numeroRepeticoes = numeroRepeticoes.toInt(),
-                                    idDiaTreino = -1
+                                Refeicao(
+                                    tipo = tipoRefeicao,
+                                    detalhes = detalhesRefeicao,
+                                    idDiaDieta = -1
                                 )
                             )
 
-                            viewiewModel.setNomeExercicio(dia, "")
-                            viewiewModel.setNumeroSeries(dia, "")
-                            viewiewModel.setNumeroRepeticoes(dia, "")
+                            viewiewModel.setTipoRefeicao(dia, "")
+                            viewiewModel.setDetalhesRefeicao(dia, "")
                             onClickOk()
                         } else {
-                            if (nomeExercicio.isEmpty()) {
-                                isNomeExercicioError = true
+                            if (tipoRefeicao.isEmpty()) {
+                                isTipoRefeicaoError = true
                             }
-                            if (numeroSeries.isEmpty()) {
-                                isNumeroSeriesError = true
-                            }
-                            if (numeroRepeticoes.isEmpty()) {
-                                isNumeroRepeticoesError = true
+                            if (detalhesRefeicao.isEmpty()) {
+                                isDetalhesRefeicaoError = true
                             }
                         }
                     },
@@ -566,7 +482,8 @@ fun CustomAlertDialogCadastroExercicio(
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .width(120.dp).height(50.dp)
+                        .width(120.dp)
+                        .height(50.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.ok),

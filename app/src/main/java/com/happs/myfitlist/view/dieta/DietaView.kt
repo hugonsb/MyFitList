@@ -1,11 +1,5 @@
-package com.happs.myfitlist.view.treino
+package com.happs.myfitlist.view.dieta
 
-import android.app.Activity
-import android.os.Handler
-import android.os.Looper
-import android.widget.Toast
-import androidx.activity.OnBackPressedCallback
-import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -45,7 +39,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,7 +47,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -65,9 +57,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.happs.myfitlist.R
-import com.happs.myfitlist.model.treino.DiaTreino
-import com.happs.myfitlist.model.treino.Exercicio
-import com.happs.myfitlist.model.treino.PlanoTreino
+import com.happs.myfitlist.model.dieta.DiaDieta
+import com.happs.myfitlist.model.dieta.PlanoDieta
+import com.happs.myfitlist.model.dieta.Refeicao
 import com.happs.myfitlist.model.usuario.Usuario
 import com.happs.myfitlist.ui.theme.MyBlack
 import com.happs.myfitlist.ui.theme.MyRed
@@ -80,54 +72,18 @@ import com.happs.myfitlist.util.DiasList
 import com.happs.myfitlist.util.func.getCurrentDayOfWeekIndex
 import com.happs.myfitlist.util.pager.PageIndicator
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
-import com.happs.myfitlist.viewmodel.treino.TreinoViewModel
+import com.happs.myfitlist.viewmodel.dieta.DietaViewModel
 
 @Composable
-fun TreinoView(
+fun DietaView(
     navController: NavHostController,
-    viewModel: TreinoViewModel = viewModel(factory = AppViewModelProvider.Factory)
-) {
+    viewModel: DietaViewModel = viewModel(factory = AppViewModelProvider.Factory)
+){
+    val uiState by viewModel.dietaState.collectAsState()
 
-    val ctx = LocalContext.current
+    var expandedPlanoDietaList by remember { mutableStateOf(false) }
 
-    //funcionalidade "toque novamente pra sair"
-    var backPressedOnce = false
-    val onBackPressedDispatcher = LocalOnBackPressedDispatcherOwner.current
-    val backCallback = remember {
-        object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                // Fecha o aplicativo ao clicar em voltar em menos de 2s
-                if (backPressedOnce) {
-                    (ctx as? Activity)?.finish()
-                } else {
-                    backPressedOnce = true
-                    Toast.makeText(
-                        ctx,
-                        R.string.toque_em_voltar_sair,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                    Handler(Looper.getMainLooper()).postDelayed(
-                        { backPressedOnce = false },
-                        2000
-                    )
-                }
-            }
-        }
-    }
-
-    // callback para interceptar o evento de voltar
-    DisposableEffect(onBackPressedDispatcher) {
-        onBackPressedDispatcher?.onBackPressedDispatcher?.addCallback(backCallback)
-        onDispose {
-            backCallback.remove()
-        }
-    }
-
-    val uiState by viewModel.treinoState.collectAsState()
-
-    var expandedPlanoTreinoList by remember { mutableStateOf(false) }
-
-    val listPlanoTreinoState = rememberLazyListState()
+    val listPlanoDietaState = rememberLazyListState()
 
     val usuario = uiState.usuario
 
@@ -151,29 +107,29 @@ fun TreinoView(
             )
         ) {
 
-            if (expandedPlanoTreinoList && uiState.listaPlanosTreino.isNotEmpty()) {
-                PlanosTreinoList(
-                    listPlanoTreino = uiState.listaPlanosTreino,
-                    planoTreinoPrincipal = uiState.planoTreinoPrincipal,
-                    listPlanoTreinoState = listPlanoTreinoState,
+            if (expandedPlanoDietaList && uiState.listaPlanosDieta.isNotEmpty()) {
+                PlanosDietaList(
+                    listPlanoDieta = uiState.listaPlanosDieta,
+                    planoDietaPrincipal = uiState.planoDietaPrincipal,
+                    listPlanoDietaState = listPlanoDietaState,
                     usuario = usuario,
                     viewModel = viewModel,
-                    selecionarPlano = { expandedPlanoTreinoList = false }
+                    selecionarPlano = { expandedPlanoDietaList = false }
                 )
-            } else if (usuario.idPlanoTreinoPrincipal != -1) {
+            } else if (usuario.idPlanoDietaPrincipal != -1) {
 
-                PlanoTreinoPrincipal(
-                    planoTreinoPrincipal = uiState.planoTreinoPrincipal,
+                PlanoDietaPrincipal(
+                    planoDietaPrincipal = uiState.planoDietaPrincipal,
                     usuario = usuario,
                     navController = navController,
-                    clickPlano = { expandedPlanoTreinoList = true }
+                    clickPlano = { expandedPlanoDietaList = true }
                 )
             }
         }
 
         Box {
 
-            DiasTreinoList(listDiaTreino = uiState.diasComExercicios)
+            DiasRefeicaoList(listDiaDieta = uiState.diasComRefeicoes)
 
             FloatingActionButton(modifier = Modifier
                 .padding(bottom = 10.dp)
@@ -184,7 +140,7 @@ fun TreinoView(
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 3.dp),
                 shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp),
                 onClick = {
-                    navController.navigate("criar_plano_treino") { launchSingleTop = true }
+                    navController.navigate("criar_plano_alimentar") { launchSingleTop = true }
                 }) {
                 Icon(
                     imageVector = Icons.Default.Add,
@@ -204,7 +160,7 @@ fun Header(usuario: Usuario) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
-            text = "Olá ${usuario.nome.split(" ")[0]} 💪",
+            text = "Olá ${usuario.nome.split(" ")[0]} 🥗",
             fontFamily = myFontTitle,
             fontSize = 50.sp,
             maxLines = 1,
@@ -217,8 +173,8 @@ fun Header(usuario: Usuario) {
 }
 
 @Composable
-fun PlanoTreinoPrincipal(
-    planoTreinoPrincipal: PlanoTreino,
+fun PlanoDietaPrincipal(
+    planoDietaPrincipal: PlanoDieta,
     usuario: Usuario,
     navController: NavHostController,
     clickPlano: () -> Unit
@@ -239,7 +195,7 @@ fun PlanoTreinoPrincipal(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = planoTreinoPrincipal.nome,
+                    text = planoDietaPrincipal.nome,
                     fontFamily = myFontTitle,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -255,7 +211,7 @@ fun PlanoTreinoPrincipal(
 
         Card(
             onClick = {
-                navController.navigate("editar_plano/${usuario.idPlanoTreinoPrincipal}") {
+                navController.navigate("editar_plano/${usuario.idPlanoDietaPrincipal}") {
                     launchSingleTop = true
                 }
             },
@@ -282,27 +238,27 @@ fun PlanoTreinoPrincipal(
 }
 
 @Composable
-fun PlanosTreinoList(
-    listPlanoTreino: List<PlanoTreino>,
-    planoTreinoPrincipal: PlanoTreino,
-    listPlanoTreinoState: LazyListState,
+fun PlanosDietaList(
+    listPlanoDieta: List<PlanoDieta>,
+    planoDietaPrincipal: PlanoDieta,
+    listPlanoDietaState: LazyListState,
     usuario: Usuario,
-    viewModel: TreinoViewModel,
+    viewModel: DietaViewModel,
     selecionarPlano: () -> Unit
 ) {
 
     val openDialog = remember { mutableStateOf(false) }
-    val planoTreinoParaExcluir = remember { mutableStateOf<PlanoTreino?>(null) }
+    val planoDietaParaExcluir = remember { mutableStateOf<PlanoDieta?>(null) }
 
-    if (openDialog.value && planoTreinoParaExcluir.value != null) {
+    if (openDialog.value && planoDietaParaExcluir.value != null) {
         CustomAlertDialog(
             title = stringResource(R.string.confirmar),
             text = stringResource(R.string.tem_certeza_que_deseja_excluir),
             textButtomConfirm = stringResource(R.string.confirmar),
             onclose = { openDialog.value = false },
             onConfirm = {
-                planoTreinoParaExcluir.value?.let {
-                    viewModel.excluirPlanoTreino(it)
+                planoDietaParaExcluir.value?.let {
+                    viewModel.excluirPlanoDieta(it)
                 }
                 openDialog.value = false
             }
@@ -327,15 +283,15 @@ fun PlanosTreinoList(
         ) {
             Text(
                 modifier = Modifier.padding(start = 5.dp, bottom = 5.dp),
-                text = "Planos de treino",
+                text = "Planos alimentares",
                 fontFamily = myFontTitle,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold,
                 color = MyBlack,
             )
-            if (listPlanoTreino.isNotEmpty()) {
-                LazyColumn(state = listPlanoTreinoState) {
-                    items(listPlanoTreino) {
+            if (listPlanoDieta.isNotEmpty()) {
+                LazyColumn(state = listPlanoDietaState) {
+                    items(listPlanoDieta) {
                         Card(
                             modifier = Modifier.padding(bottom = 10.dp),
                             shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp)
@@ -351,7 +307,7 @@ fun PlanosTreinoList(
                                 Row(
                                     modifier = Modifier
                                         .clickable {
-                                            viewModel.atualizarPlanoTreinoPrincipal(
+                                            viewModel.atualizarPlanoDietaPrincipal(
                                                 usuario.id,
                                                 it.id
                                             )
@@ -361,7 +317,7 @@ fun PlanosTreinoList(
                                 ) {
                                     Icon(
                                         tint = MyYellow,
-                                        painter = painterResource(id = if (planoTreinoPrincipal.id == it.id) R.drawable.baseline_star_24 else R.drawable.baseline_star_border_24),
+                                        painter = painterResource(id = if (planoDietaPrincipal.id == it.id) R.drawable.baseline_star_24 else R.drawable.baseline_star_border_24),
                                         contentDescription = "Selecionar como principal",
                                         modifier = Modifier
                                             .size(35.dp)
@@ -378,7 +334,7 @@ fun PlanosTreinoList(
                                 }
                                 Icon(
                                     modifier = Modifier.clickable {
-                                        planoTreinoParaExcluir.value = it
+                                        planoDietaParaExcluir.value = it
                                         openDialog.value = true
                                     },
                                     tint = MyWhite,
@@ -413,11 +369,11 @@ fun PlanosTreinoList(
 }
 
 @Composable
-fun DiasTreinoList(
-    listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>,
+fun DiasRefeicaoList(
+    listDiaDieta: Array<Pair<DiaDieta, List<Refeicao>>>,
 ) {
-    if (listDiaTreino.size == 7) {
-        CustomPagerDiaTreino(listDiaTreino = listDiaTreino)
+    if (listDiaDieta.size == 7) {
+        CustomPagerDiaDieta(listDiaDieta = listDiaDieta)
     } else {
         Column(
             modifier = Modifier.fillMaxSize(),
@@ -425,7 +381,7 @@ fun DiasTreinoList(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Nenhum plano de treino selecionado",
+                text = "Nenhum plano alimentar selecionado",
                 textAlign = TextAlign.Center,
                 fontFamily = myFontTitle,
                 fontSize = 25.sp,
@@ -438,7 +394,7 @@ fun DiasTreinoList(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CustomPagerDiaTreino(listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>) {
+fun CustomPagerDiaDieta(listDiaDieta: Array<Pair<DiaDieta, List<Refeicao>>>) {
 
     val pagerState = rememberPagerState(
         pageCount = { DiasList.dias.size },
@@ -487,46 +443,38 @@ fun CustomPagerDiaTreino(listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>)
                                 .padding(10.dp)
                         ) {
                             Text(
-                                text = listDiaTreino[currentPage].first.dia,
+                                text = listDiaDieta[currentPage].first.dia,
                                 fontFamily = myFontTitle,
                                 fontSize = 20.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = MyBlack,
                             )
-                            Text(
-                                text = listDiaTreino[currentPage].first.grupoMuscular,
-                                fontFamily = myFontTitle,
-                                fontSize = 29.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MyRed,
-                            )
 
-                            Spacer(modifier = Modifier.height(5.dp))
-
-                            for ((index, exercicio) in listDiaTreino[currentPage].second.withIndex()) {
+                            for ((index, refeicao) in listDiaDieta[currentPage].second.withIndex()) {
                                 Row(
                                     modifier = Modifier.padding(vertical = 6.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.Top
                                 ) {
                                     Icon(
                                         tint = MyRed,
-                                        painter = painterResource(id = R.drawable.dumbbell_icon),
-                                        contentDescription = "Imagem do exercício",
+                                        painter = painterResource(id = R.drawable.food_icon),
+                                        contentDescription = null,
                                         modifier = Modifier.size(40.dp)
                                     )
 
                                     Spacer(modifier = Modifier.width(8.dp))
 
                                     Column {
+                                        Spacer(modifier = Modifier.height(3.dp))
                                         Text(
-                                            text = exercicio.nome,
-                                            fontFamily = myFontBody,
+                                            text = refeicao.tipo,
+                                            fontFamily = myFontTitle,
                                             fontSize = 20.sp,
                                             lineHeight = 19.sp,
-                                            color = MyBlack,
+                                            color = MyRed,
                                         )
                                         Text(
-                                            text = "SÉRIES: ${exercicio.numeroSeries} REPS.: ${exercicio.numeroRepeticoes}",
+                                            text = refeicao.detalhes,
                                             fontFamily = myFontBody,
                                             fontSize = 12.sp,
                                             lineHeight = 19.sp,
@@ -535,7 +483,7 @@ fun CustomPagerDiaTreino(listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>)
                                     }
                                 }
 
-                                if (index < listDiaTreino[currentPage].second.size - 1) {
+                                if (index < listDiaDieta[currentPage].second.size - 1) {
                                     Spacer(modifier = Modifier.height(10.dp))
                                     Spacer(
                                         modifier = Modifier
@@ -546,7 +494,6 @@ fun CustomPagerDiaTreino(listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>)
                                     Spacer(modifier = Modifier.height(10.dp))
                                 }
                             }
-
                         }
                     }
                 }

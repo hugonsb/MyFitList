@@ -90,7 +90,6 @@ class TreinoViewModel(
                     planosRestantes.firstOrNull()?.id ?: -1
                 atualizarPlanoTreinoPrincipal(usuario.id, novoPlanoPrincipalId)
             }
-            atualizarEstado()
         }
     }
 }
