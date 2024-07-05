@@ -275,7 +275,7 @@ fun PlanosTreinoList(
                         ) {
                             Row(
                                 modifier = Modifier
-                                    .background(MyBlack.copy(0.1f))
+                                    .background(MaterialTheme.colorScheme.primary.copy(0.5f))
                                     .padding(5.dp)
                                     .fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -304,7 +304,7 @@ fun PlanosTreinoList(
                                         text = it.nome,
                                         fontFamily = myFontBody,
                                         fontSize = 16.sp,
-                                        color = MyBlack,
+                                        color = MyWhite,
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis
                                     )
@@ -314,7 +314,7 @@ fun PlanosTreinoList(
                                         planoTreinoParaExcluir.value = it
                                         openDialog.value = true
                                     },
-                                    tint = MyBlack,
+                                    tint = MyWhite,
                                     painter = painterResource(id = R.drawable.baseline_close_24),
                                     contentDescription = "Remover exercício",
                                 )
