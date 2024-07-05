@@ -13,8 +13,11 @@ val light_background = Color(0xFFA21916)
 val light_text = Color(0xFF000000)
 val light_bg_text = Color(0xFF000000)
 val light_title = Color(0xFF000000)
+val light_bg_itens = Color(0xFFCA6764)
+
 //cores para o tema escuro
 val dark_background = Color(0xFF0B0C0F)
 val dark_text = Color(0xFFFFFFFF)
 val dark_bg_text = Color(0xFFFFFFFF)
 val dark_title = Color(0xFFA21916)
+val dark_bg_itens = Color(0xFF6D6D6F)

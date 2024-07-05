@@ -25,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -191,7 +192,7 @@ fun EditarPlanoTreinoView(
         }
 
         if (enabledButton) {
-            OutlinedButton(
+            FilledTonalButton(
                 onClick = {
                     coroutineScope.launch {
                         enabledButton = false
@@ -204,7 +205,7 @@ fun EditarPlanoTreinoView(
                         Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
                     }
                 },
-                colors = ButtonDefaults.buttonColors(containerColor = MyRed),
+                colors = ButtonDefaults.buttonColors(containerColor = MyWhite),
                 shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -216,7 +217,7 @@ fun EditarPlanoTreinoView(
                     text = "SALVAR ALTERAÇÕES",
                     fontFamily = myFontTitle,
                     fontSize = 25.sp,
-                    color = MyWhite,
+                    color = MaterialTheme.colorScheme.primary,
                 )
             }
         }
@@ -307,8 +308,8 @@ fun CustomCardEditarDiaSemanaa(
                     ) {
                         Row(
                             modifier = Modifier
-                                .background(MyRed.copy(0.3f))
-                                .padding(5.dp)
+                                .background(MaterialTheme.colorScheme.primary.copy(0.5f))
+                                .padding(8.dp)
                                 .fillMaxWidth(),
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
@@ -319,14 +320,14 @@ fun CustomCardEditarDiaSemanaa(
                                 text = "${exercicio.nome} ${exercicio.numeroSeries}x${exercicio.numeroRepeticoes}",
                                 fontFamily = myFontBody,
                                 fontSize = 15.sp,
-                                color = MyBlack,
+                                color = MyWhite,
                             )
                             Icon(
                                 modifier = Modifier
                                     .clickable {
                                         viewModel.removerExercicio(indiceDia, exercicio)
                                     },
-                                tint = MyBlack,
+                                tint = MyWhite,
                                 painter = painterResource(id = R.drawable.baseline_close_24),
                                 contentDescription = "Remover exercício",
                             )

@@ -177,7 +177,7 @@ fun TreinoView(
                 .padding(bottom = 10.dp)
                 .size(55.dp)
                 .align(Alignment.BottomEnd),
-                containerColor = MaterialTheme.colorScheme.primary,
+                containerColor = MaterialTheme.colorScheme.onSecondary,
                 contentColor = MyWhite,
                 elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 3.dp),
                 shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp),
@@ -362,7 +362,7 @@ fun PlanoTreinoPrincipal(
                 modifier = Modifier
                     .height(55.dp)
                     .fillMaxWidth()
-                    .background(MyRed.copy(0.6f))
+                    .background(MaterialTheme.colorScheme.onSecondary)
                     .padding(start = 10.dp, end = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
@@ -393,7 +393,7 @@ fun PlanoTreinoPrincipal(
             Row(
                 modifier = Modifier
                     .height(55.dp)
-                    .background(MyRed.copy(0.6f))
+                    .background(MaterialTheme.colorScheme.onSecondary)
                     .padding(start = 15.dp, end = 15.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically

@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -55,7 +56,7 @@ fun PageIndicator(pageCount: Int, currentPage: Int, pagerState: PagerState, modi
 fun IndicatorDots(isSelected: Boolean, dia: String, onClick: () -> Unit) {
     val size = animateDpAsState(targetValue = if (isSelected) 45.dp else 40.dp, label = "")
     val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) MyWhite else MyWhite.copy(0.4f),
+        targetValue = if (isSelected) MyWhite else MaterialTheme.colorScheme.onSecondary,
         animationSpec = spring(), label = ""
     )
 

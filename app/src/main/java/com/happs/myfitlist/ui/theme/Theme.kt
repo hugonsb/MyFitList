@@ -12,14 +12,16 @@ import androidx.compose.ui.platform.LocalView
 private val LightColors = lightColorScheme(
     primary = light_background,
     secondary = light_text,
-    tertiary = light_bg_text,
+    onSecondary = light_bg_itens, //cor para backgrounds de itens
+    tertiary = light_bg_text, //cor para alguns textos
     onTertiary = light_title
 )
 
 private val DarkColors = darkColorScheme(
     primary = dark_background,
     secondary = dark_text,
-    tertiary = dark_bg_text,
+    onSecondary = dark_bg_itens, //cor para backgrounds de itens
+    tertiary = dark_bg_text, //cor para alguns textos
     onTertiary = dark_title
 )
 

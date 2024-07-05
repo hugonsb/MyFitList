@@ -10,7 +10,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,7 +28,6 @@ fun NavBar(navController: NavHostController) {
     val items = BottomNavItem.items()
 
     NavigationBar(
-        //modifier = Modifier.height(70.dp),
         containerColor = MaterialTheme.colorScheme.primary.copy(0.9f)
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -41,7 +39,7 @@ fun NavBar(navController: NavHostController) {
                     unselectedIconColor = MyWhite.copy(0.8f),
                     selectedTextColor = MyWhite,
                     unselectedTextColor = MyWhite.copy(0.8f),
-                    indicatorColor = MaterialTheme.colorScheme.tertiary.copy(0.35f)
+                    indicatorColor = MaterialTheme.colorScheme.onSecondary
                 ),
                 label = { Text(screen.label, fontSize = 10.sp, fontWeight = FontWeight.Bold) },
                 alwaysShowLabel = true,
