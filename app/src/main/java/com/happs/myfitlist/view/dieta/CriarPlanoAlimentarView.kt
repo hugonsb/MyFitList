@@ -25,6 +25,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -359,6 +361,8 @@ fun CustomAlertDialogCadastroRefeicao(
     var isTipoRefeicaoError by rememberSaveable { mutableStateOf(false) }
     var isDetalhesRefeicaoError by rememberSaveable { mutableStateOf(false) }
 
+    var checkerClone by rememberSaveable { mutableStateOf(false) }
+
     AlertDialog(
         containerColor = Color.White,
         onDismissRequest = {
@@ -383,7 +387,7 @@ fun CustomAlertDialogCadastroRefeicao(
                 OutlinedTextField(
                     value = uiState.tipoRefeicao[dia],
                     onValueChange = {
-                        if (it.length <= 100) {
+                        if (it.length <= 200) {
                             viewiewModel.setTipoRefeicao(dia, it)
                             isTipoRefeicaoError = false
                         }
@@ -417,7 +421,7 @@ fun CustomAlertDialogCadastroRefeicao(
                 OutlinedTextField(
                     value = uiState.detalhesRefeicao[dia],
                     onValueChange = {
-                        if (it.length <= 200) {
+                        if (it.length <= 500) {
                             viewiewModel.setDetalhesRefeicao(dia, it)
                             isDetalhesRefeicaoError = false
                         }
@@ -429,6 +433,7 @@ fun CustomAlertDialogCadastroRefeicao(
                     ),
                     isError = isDetalhesRefeicaoError,
                     supportingText = { if (isDetalhesRefeicaoError) Text(stringResource(R.string.campo_obrigat_rio)) },
+                    maxLines = 8,
                     placeholder = {
                         Text(
                             text = "Detalhes da refeição",
@@ -448,6 +453,27 @@ fun CustomAlertDialogCadastroRefeicao(
                     shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
                 )
 
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Checkbox(
+                        checked = checkerClone,
+                        onCheckedChange = { checkerClone = !checkerClone },
+                        colors = CheckboxDefaults.colors(
+                            MaterialTheme.colorScheme.primary,
+                            checkmarkColor = MyWhite
+                        )
+                    )
+                    Text(
+                        text = "Adicionar essa refeição em todos os outros dias da semana",
+                        fontFamily = myFontBody,
+                        fontWeight = FontWeight.Bold,
+                        color = Color.Black,
+                        fontSize = 12.sp,
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(15.dp))
 
                 OutlinedButton(
@@ -457,18 +483,26 @@ fun CustomAlertDialogCadastroRefeicao(
 
                         if (tipoRefeicao.isNotEmpty() && detalhesRefeicao.isNotEmpty()) {
 
-                            viewiewModel.adicionarRefeicao(
-                                dia,
-                                Refeicao(
-                                    tipo = tipoRefeicao,
-                                    detalhes = detalhesRefeicao,
-                                    idDiaDieta = -1
+                            if (checkerClone) {
+                                for (i in 0..6) {
+                                    adicionarRefeicao(
+                                        i,
+                                        tipoRefeicao,
+                                        detalhesRefeicao,
+                                        onClickOk,
+                                        viewiewModel
+                                    )
+                                }
+                            } else {
+                                adicionarRefeicao(
+                                    dia,
+                                    tipoRefeicao,
+                                    detalhesRefeicao,
+                                    onClickOk,
+                                    viewiewModel
                                 )
-                            )
+                            }
 
-                            viewiewModel.setTipoRefeicao(dia, "")
-                            viewiewModel.setDetalhesRefeicao(dia, "")
-                            onClickOk()
                         } else {
                             if (tipoRefeicao.isEmpty()) {
                                 isTipoRefeicaoError = true
@@ -510,4 +544,25 @@ fun CustomAlertDialogCadastroRefeicao(
         confirmButton = {},
         dismissButton = {},
     )
+}
+
+fun adicionarRefeicao(
+    indiceDia: Int,
+    tipo: String,
+    detalhes: String,
+    onClickOk: () -> Unit,
+    viewiewModel: CriarPlanoDietaViewModel
+) {
+    viewiewModel.adicionarRefeicao(
+        indiceDia,
+        Refeicao(
+            tipo = tipo,
+            detalhes = detalhes,
+            idDiaDieta = -1
+        )
+    )
+
+    viewiewModel.setTipoRefeicao(indiceDia, "")
+    viewiewModel.setDetalhesRefeicao(indiceDia, "")
+    onClickOk()
 }

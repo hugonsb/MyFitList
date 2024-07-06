@@ -18,5 +18,5 @@ import androidx.room.PrimaryKey
 data class DiaDieta(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     @ColumnInfo("dia") val dia: String,
-    @ColumnInfo("idPlanoDieta") val idPlanoTreino: Int
+    @ColumnInfo("idPlanoDieta") val idPlanoDieta: Int
 )

@@ -381,7 +381,15 @@ fun DiasRefeicaoList(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Nenhum plano alimentar selecionado",
+                text = "Experimente criar um plano alimentar!",
+                textAlign = TextAlign.Center,
+                fontFamily = myFontTitle,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold,
+                color = MyWhite,
+            )
+            Text(
+                text = "Toque no botão + abaixo para começar",
                 textAlign = TextAlign.Center,
                 fontFamily = myFontTitle,
                 fontSize = 25.sp,
@@ -391,7 +399,6 @@ fun DiasRefeicaoList(
         }
     }
 }
-
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CustomPagerDiaDieta(listDiaDieta: Array<Pair<DiaDieta, List<Refeicao>>>) {

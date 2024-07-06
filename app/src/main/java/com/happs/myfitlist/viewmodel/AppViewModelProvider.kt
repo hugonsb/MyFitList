@@ -9,8 +9,9 @@ import com.happs.myfitlist.MyFitListApplication
 import com.happs.myfitlist.viewmodel.cadastro.CadastroViewModel
 import com.happs.myfitlist.viewmodel.dieta.CriarPlanoDietaViewModel
 import com.happs.myfitlist.viewmodel.dieta.DietaViewModel
+import com.happs.myfitlist.viewmodel.dieta.EditarPlanoDietaViewModel
 import com.happs.myfitlist.viewmodel.treino.CriarPlanoTreinoViewModel
-import com.happs.myfitlist.viewmodel.treino.EditarPlanoViewModel
+import com.happs.myfitlist.viewmodel.treino.EditarPlanoTreinoViewModel
 import com.happs.myfitlist.viewmodel.treino.TreinoViewModel
 
 object AppViewModelProvider {
@@ -26,13 +27,17 @@ object AppViewModelProvider {
         }
         initializer {
             val savedStateHandle = createSavedStateHandle()
-            EditarPlanoViewModel(myFitList().container.treinoRepository, savedStateHandle)
+            EditarPlanoTreinoViewModel(myFitList().container.treinoRepository, savedStateHandle)
         }
         initializer {
             DietaViewModel(myFitList().container.treinoRepository)
         }
         initializer {
             CriarPlanoDietaViewModel(myFitList().container.treinoRepository)
+        }
+        initializer {
+            val savedStateHandle = createSavedStateHandle()
+            EditarPlanoDietaViewModel(myFitList().container.treinoRepository, savedStateHandle)
         }
     }
 }

@@ -20,10 +20,10 @@ fun NavDieta() {
         composable("dieta") { DietaView(navController) }
         composable("criar_plano_alimentar") { CriarPlanoAlimentarView(navController) }
         composable(
-            route = "editar_plano/{planoAlimentarId}",
-            arguments = listOf(navArgument("planoAlimentarId") { type = NavType.IntType }
+            route = "editar_plano/{planoDietaId}",
+            arguments = listOf(navArgument("planoDietaId") { type = NavType.IntType }
             )) {
-            EditarPlanoAlimentarVIew(navController, it.arguments!!.getInt("planoAlimentarId"))
+            EditarPlanoAlimentarVIew(navController, it.arguments!!.getInt("planoDietaId"))
         }
     }
 }

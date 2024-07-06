@@ -70,7 +70,7 @@ import com.happs.myfitlist.util.CustomTopAppBar
 import com.happs.myfitlist.util.DiasList
 import com.happs.myfitlist.util.pager.PageIndicator
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
-import com.happs.myfitlist.viewmodel.treino.EditarPlanoViewModel
+import com.happs.myfitlist.viewmodel.treino.EditarPlanoTreinoViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -78,7 +78,7 @@ import kotlinx.coroutines.launch
 fun EditarPlanoTreinoView(
     navController: NavHostController,
     planoTreinoId: Int,
-    viewModel: EditarPlanoViewModel = viewModel(
+    viewModel: EditarPlanoTreinoViewModel = viewModel(
         factory = AppViewModelProvider.Factory
     )
 ) {
@@ -227,7 +227,7 @@ fun EditarPlanoTreinoView(
 @Composable
 fun CustomCardEditarDiaSemanaa(
     indiceDia: Int,
-    viewModel: EditarPlanoViewModel = viewModel(
+    viewModel: EditarPlanoTreinoViewModel = viewModel(
         factory = AppViewModelProvider.Factory
     )
 ) {
@@ -381,7 +381,7 @@ fun CustomAlertDialogEditarExercicio(
     dia: Int,
     onClickOk: () -> Unit,
     onClickCancelar: () -> Unit,
-    viewiewModel: EditarPlanoViewModel = viewModel(
+    viewiewModel: EditarPlanoTreinoViewModel = viewModel(
         factory = AppViewModelProvider.Factory
     )
 ) {

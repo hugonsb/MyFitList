@@ -425,7 +425,15 @@ fun DiasTreinoList(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Nenhum plano de treino selecionado",
+                text = "Experimente criar um plano de treino",
+                textAlign = TextAlign.Center,
+                fontFamily = myFontTitle,
+                fontSize = 25.sp,
+                fontWeight = FontWeight.Bold,
+                color = MyWhite,
+            )
+            Text(
+                text = "Toque no botão + abaixo para começar",
                 textAlign = TextAlign.Center,
                 fontFamily = myFontTitle,
                 fontSize = 25.sp,

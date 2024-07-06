@@ -16,7 +16,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class EditarPlanoViewModel(
+class EditarPlanoTreinoViewModel(
     private val treinoRepository: TreinoRepository,
     savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
@@ -152,7 +152,7 @@ class EditarPlanoViewModel(
             Pair(true, "Editado com sucesso")
 
         } catch (e: Exception) {
-            Log.e("CriarPlanoTreino", "Erro ao editar: ${e.message}")
+            Log.e("EditarPlanoTreino", "Erro ao editar: ${e.message}")
             Pair(false, e.message.toString())
         }
     }
