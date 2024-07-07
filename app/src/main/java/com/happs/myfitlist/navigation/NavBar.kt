@@ -69,8 +69,8 @@ fun NavBar(navController: NavHostController) {
 
 sealed class BottomNavItem(val route: String, val icon: Painter, val label: String) {
     class Treino(icon: Painter) : BottomNavItem("nav_treino", icon, "Treino")
-    class Dieta(icon: Painter) : BottomNavItem("dieta", icon, "Dieta")
-    class Configuracoes(icon: Painter) : BottomNavItem("configuracoes", icon, "Configurações")
+    class Dieta(icon: Painter) : BottomNavItem("nav_dieta", icon, "Dieta")
+    class Configuracoes(icon: Painter) : BottomNavItem("nav_configuracoes", icon, "Configurações")
 
     companion object {
         @Composable

@@ -36,36 +36,39 @@ class DietaViewModel(
     private suspend fun atualizarEstado() {
         val usuarioFlow = treinoRepository.getUsuario()
         val usuario = usuarioFlow.first()
-        val planoDietaPrincipalFlow = if (usuario.idPlanoDietaPrincipal != -1) {
-            treinoRepository.getPlanoDieta(usuario.idPlanoDietaPrincipal)
-        } else {
-            flowOf(null)
-        }
 
-        val planoDietaPrincipal = planoDietaPrincipalFlow.first()
+        if (usuario != null) {
+            val planoDietaPrincipalFlow = if (usuario.idPlanoDietaPrincipal != -1) {
+                treinoRepository.getPlanoDieta(usuario.idPlanoDietaPrincipal)
+            } else {
+                flowOf(null)
+            }
 
-        val diasDieta = if (planoDietaPrincipal != null && planoDietaPrincipal.id != -1) {
-            treinoRepository.getDiasDieta(planoDietaPrincipal.id).first()
-        } else {
-            emptyList()
-        }
+            val planoDietaPrincipal = planoDietaPrincipalFlow.first()
 
-        val diasComRefeicoes = diasDieta.map { diaDieta ->
-            val refeicoes = treinoRepository.getRefeicoes(diaDieta.id).first()
-            Pair(diaDieta, refeicoes)
-        }.toTypedArray()
+            val diasDieta = if (planoDietaPrincipal != null && planoDietaPrincipal.id != -1) {
+                treinoRepository.getDiasDieta(planoDietaPrincipal.id).first()
+            } else {
+                emptyList()
+            }
 
-        _dietaState.update { currentState ->
-            currentState.copy(
-                usuario = usuario,
-                planoDietaPrincipal = planoDietaPrincipal ?: PlanoDieta(
-                    id = -1,
-                    nome = "",
-                    idUsuario = -1
-                ),
-                listaPlanosDieta = treinoRepository.getPlanosDieta().first(),
-                diasComRefeicoes = diasComRefeicoes
-            )
+            val diasComRefeicoes = diasDieta.map { diaDieta ->
+                val refeicoes = treinoRepository.getRefeicoes(diaDieta.id).first()
+                Pair(diaDieta, refeicoes)
+            }.toTypedArray()
+
+            _dietaState.update { currentState ->
+                currentState.copy(
+                    usuario = usuario,
+                    planoDietaPrincipal = planoDietaPrincipal ?: PlanoDieta(
+                        id = -1,
+                        nome = "",
+                        idUsuario = -1
+                    ),
+                    listaPlanosDieta = treinoRepository.getPlanosDieta().first(),
+                    diasComRefeicoes = diasComRefeicoes
+                )
+            }
         }
     }
 

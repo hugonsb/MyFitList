@@ -16,7 +16,6 @@ interface TreinoRepository {
     suspend fun updateUser(usuario: Usuario)
     suspend fun removeUser(usuario: Usuario)
 
-
     // treino
 
     suspend fun updatePlanoTreinoPrincipal(usuarioId: Int, planoTreinoId: Int)
@@ -54,4 +53,6 @@ interface TreinoRepository {
     suspend fun addRefeicao(refeicao: Refeicao)
     suspend fun updateRefeicao(refeicao: Refeicao)
     suspend fun removeRefeicao(refeicao: Refeicao)
+
+    suspend fun deleteAllData()
 }

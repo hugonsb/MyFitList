@@ -93,4 +93,6 @@ class OfflineTreinoRepository(private val treinoDao: TreinoDao) : TreinoReposito
     override suspend fun updateRefeicao(refeicao: Refeicao) = treinoDao.updateRefeicao(refeicao)
 
     override suspend fun removeRefeicao(refeicao: Refeicao) = treinoDao.removeRefeicao(refeicao)
+
+    override suspend fun deleteAllData() = treinoDao.deleteAllData()
 }

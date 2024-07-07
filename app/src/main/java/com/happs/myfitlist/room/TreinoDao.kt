@@ -116,4 +116,7 @@ interface TreinoDao {
 
     @Delete
     suspend fun removeRefeicao(refeicao: Refeicao)
+
+    @Query("DELETE FROM usuario")
+    suspend fun deleteAllData()
 }

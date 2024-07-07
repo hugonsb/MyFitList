@@ -40,5 +40,26 @@ object TextFieldColors {
         cursorColor = MyWhite,
         errorCursorColor = MyWhite,
         errorSupportingTextColor = MyBlack,
+        unfocusedTrailingIconColor = MyWhite,
+        focusedTrailingIconColor = MyWhite,
+        errorTrailingIconColor = MyWhite,
+        disabledTrailingIconColor = MyWhite
+    )
+
+    @Composable
+    fun colorsTextFieldsCadastro() = OutlinedTextFieldDefaults.colors(
+        unfocusedContainerColor = MyWhite.copy(0.45f),
+        focusedContainerColor = MaterialTheme.colorScheme.tertiary.copy(0.2f),
+        errorContainerColor = MaterialTheme.colorScheme.tertiary.copy(0.2f),
+        focusedTextColor = MyWhite,
+        unfocusedTextColor = MyWhite,
+        unfocusedBorderColor = MyWhite.copy(0.5f),
+        focusedBorderColor = MyWhite,
+        errorBorderColor = MyBlack,
+        focusedPlaceholderColor = MyWhite.copy(0.85f),
+        unfocusedPlaceholderColor = MyWhite.copy(0.85f),
+        errorPlaceholderColor = MyWhite.copy(0.85f),
+        cursorColor = MyWhite,
+        errorSupportingTextColor = MyWhite,
     )
 }

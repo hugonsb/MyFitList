@@ -399,6 +399,7 @@ fun DiasRefeicaoList(
         }
     }
 }
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CustomPagerDiaDieta(listDiaDieta: Array<Pair<DiaDieta, List<Refeicao>>>) {
@@ -483,7 +484,7 @@ fun CustomPagerDiaDieta(listDiaDieta: Array<Pair<DiaDieta, List<Refeicao>>>) {
                                         Text(
                                             text = refeicao.detalhes,
                                             fontFamily = myFontBody,
-                                            fontSize = 12.sp,
+                                            fontSize = 15.sp,
                                             lineHeight = 19.sp,
                                             color = MyBlack,
                                         )

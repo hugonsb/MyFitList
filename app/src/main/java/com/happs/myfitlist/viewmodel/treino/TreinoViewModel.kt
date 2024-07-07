@@ -37,36 +37,39 @@ class TreinoViewModel(
     private suspend fun atualizarEstado() {
         val usuarioFlow = treinoRepository.getUsuario()
         val usuario = usuarioFlow.first()
-        val planoTreinoPrincipalFlow = if (usuario.idPlanoTreinoPrincipal != -1) {
-            treinoRepository.getPlanoTreino(usuario.idPlanoTreinoPrincipal)
-        } else {
-            flowOf(null)
-        }
 
-        val planoTreinoPrincipal = planoTreinoPrincipalFlow.first()
+        if (usuario != null) {
+            val planoTreinoPrincipalFlow = if (usuario.idPlanoTreinoPrincipal != -1) {
+                treinoRepository.getPlanoTreino(usuario.idPlanoTreinoPrincipal)
+            } else {
+                flowOf(null)
+            }
 
-        val diasTreino = if (planoTreinoPrincipal != null && planoTreinoPrincipal.id != -1) {
-            treinoRepository.getDiasTreino(planoTreinoPrincipal.id).first()
-        } else {
-            emptyList()
-        }
+            val planoTreinoPrincipal = planoTreinoPrincipalFlow.first()
 
-        val diasComExercicios = diasTreino.map { diaTreino ->
-            val exercicios = treinoRepository.getExercicios(diaTreino.id).first()
-            Pair(diaTreino, exercicios)
-        }.toTypedArray()
+            val diasTreino = if (planoTreinoPrincipal != null && planoTreinoPrincipal.id != -1) {
+                treinoRepository.getDiasTreino(planoTreinoPrincipal.id).first()
+            } else {
+                emptyList()
+            }
 
-        _treinoState.update { currentState ->
-            currentState.copy(
-                usuario = usuario,
-                planoTreinoPrincipal = planoTreinoPrincipal ?: PlanoTreino(
-                    id = -1,
-                    nome = "",
-                    idUsuario = -1
-                ),
-                listaPlanosTreino = treinoRepository.getPlanosTreino().first(),
-                diasComExercicios = diasComExercicios
-            )
+            val diasComExercicios = diasTreino.map { diaTreino ->
+                val exercicios = treinoRepository.getExercicios(diaTreino.id).first()
+                Pair(diaTreino, exercicios)
+            }.toTypedArray()
+
+            _treinoState.update { currentState ->
+                currentState.copy(
+                    usuario = usuario,
+                    planoTreinoPrincipal = planoTreinoPrincipal ?: PlanoTreino(
+                        id = -1,
+                        nome = "",
+                        idUsuario = -1
+                    ),
+                    listaPlanosTreino = treinoRepository.getPlanosTreino().first(),
+                    diasComExercicios = diasComExercicios
+                )
+            }
         }
     }
 

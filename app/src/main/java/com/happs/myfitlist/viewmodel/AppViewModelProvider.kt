@@ -7,6 +7,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import com.happs.myfitlist.MyFitListApplication
 import com.happs.myfitlist.viewmodel.cadastro.CadastroViewModel
+import com.happs.myfitlist.viewmodel.configuracoes.EditarDadosPessoaisViewModel
 import com.happs.myfitlist.viewmodel.dieta.CriarPlanoDietaViewModel
 import com.happs.myfitlist.viewmodel.dieta.DietaViewModel
 import com.happs.myfitlist.viewmodel.dieta.EditarPlanoDietaViewModel
@@ -38,6 +39,9 @@ object AppViewModelProvider {
         initializer {
             val savedStateHandle = createSavedStateHandle()
             EditarPlanoDietaViewModel(myFitList().container.treinoRepository, savedStateHandle)
+        }
+        initializer {
+            EditarDadosPessoaisViewModel(myFitList().container.treinoRepository)
         }
     }
 }

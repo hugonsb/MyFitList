@@ -14,6 +14,6 @@ fun NavCadastro() {
         startDestination = "cadastro",
     ) {
         composable("cadastro") { CadastroView(navController) }
-        composable("home") { NavHomeManager() }
+        composable("home") { NavHomeManager(navController) }
     }
 }

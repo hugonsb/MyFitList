@@ -1,9 +1,8 @@
-package com.happs.myfitlist.view.cadastro
+package com.happs.myfitlist.view.configuracoes
 
+import android.widget.Toast
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,11 +13,11 @@ import androidx.compose.foundation.shape.CutCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -29,7 +28,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -40,34 +40,71 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.happs.myfitlist.R
 import com.happs.myfitlist.model.usuario.Usuario
-import com.happs.myfitlist.ui.theme.MyWhite
+import com.happs.myfitlist.navigation.canGoBack
 import com.happs.myfitlist.ui.theme.TextFieldColors.colorsTextFieldsCadastro
 import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
+import com.happs.myfitlist.util.CustomAlertDialog
+import com.happs.myfitlist.util.CustomTopAppBar
 import com.happs.myfitlist.viewmodel.AppViewModelProvider
-import com.happs.myfitlist.viewmodel.cadastro.CadastroViewModel
+import com.happs.myfitlist.viewmodel.configuracoes.EditarDadosPessoaisViewModel
 import kotlinx.coroutines.launch
 
 @Composable
-fun CadastroView(
-    navController: NavController,
-    cadastroViewModel: CadastroViewModel = viewModel(factory = AppViewModelProvider.Factory)
+fun EditarDadosPessoaisView(
+    navControllerConfiguracoes: NavController,
+    viewModel: EditarDadosPessoaisViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
-    val uiCadastroState by cadastroViewModel.cadastroState.collectAsState()
 
-    if (uiCadastroState.usuario.id != -1) {
-        navController.navigate("home") { launchSingleTop = true }
-    } else if (uiCadastroState.isUserLoaded) {
-        ContentCadastro(cadastroViewModel)
+    val openDialog = remember { mutableStateOf(false) }
+
+    if (openDialog.value) {
+        CustomAlertDialog(
+            title = stringResource(R.string.deseja_voltar),
+            text = stringResource(R.string.as_alteracoes_serao_perdidas),
+            textButtomConfirm = stringResource(R.string.voltar),
+            onclose = { openDialog.value = false },
+            onConfirm = {
+                if (navControllerConfiguracoes.canGoBack) {
+                    navControllerConfiguracoes.popBackStack("configuracoes", false)
+                }
+                openDialog.value = false
+            }
+        )
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary)
+    ) {
+        CustomTopAppBar(
+            onBackPressed = { openDialog.value = true },
+            barTitle = stringResource(R.string.alterar_dados_pessoais)
+        )
+
+        Content(viewModel, navControllerConfiguracoes)
     }
 }
 
 @Composable
-fun ContentCadastro(cadastroViewModel: CadastroViewModel) {
+fun Content(viewModel: EditarDadosPessoaisViewModel, navControllerConfiguracoes: NavController) {
+
+    val ctx = LocalContext.current
+
+    val uiState by viewModel.editarDadosPessoaisState.collectAsState()
 
     var nome by rememberSaveable { mutableStateOf("") }
     var idade by rememberSaveable { mutableStateOf("") }
     var peso by rememberSaveable { mutableStateOf("") }
+
+    LaunchedEffect(uiState) {
+        nome = uiState.usuario.nome
+        idade =
+            if (uiState.usuario.idade.toString() == "-1") "" else uiState.usuario.idade.toString()
+        peso =
+            if (uiState.usuario.peso.toString() == "-1.0") "" else uiState.usuario.peso.toString()
+    }
 
     val coroutineScope = rememberCoroutineScope()
 
@@ -75,64 +112,7 @@ fun ContentCadastro(cadastroViewModel: CadastroViewModel) {
 
     var enabledButton by remember { mutableStateOf(true) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary)
-            .padding(start = 10.dp, end = 10.dp),
-    ) {
-
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            Arrangement.Center,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "MY",
-                fontFamily = myFontTitle,
-                fontSize = 55.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onTertiary,
-            )
-            Text(
-                text = "FIT",
-                fontFamily = myFontTitle,
-                fontSize = 38.sp,
-                fontWeight = FontWeight.Bold,
-                color = MyWhite,
-            )
-            Text(
-                text = "LIST",
-                fontFamily = myFontTitle,
-                fontSize = 38.sp,
-                fontWeight = FontWeight.Bold,
-                color = MyWhite,
-            )
-        }
-
-        Icon(
-            tint = MyWhite,
-            modifier = Modifier
-                .fillMaxWidth(0.7f)
-                .align(Alignment.CenterHorizontally),
-            painter = painterResource(id = R.drawable.logo),
-            contentDescription = null
-        )
-
-        Spacer(modifier = Modifier.height(15.dp))
-
-        Text(
-            text = "Comece por aqui 👇",
-            fontFamily = myFontTitle,
-            fontSize = 30.sp,
-            fontWeight = FontWeight.Bold,
-            color = MyWhite,
-            modifier = Modifier
-                .align(Alignment.Start)
-        )
-
-        Spacer(modifier = Modifier.height(15.dp))
-
+    Column(modifier = Modifier.padding(10.dp)) {
         OutlinedTextField(
             value = nome,
             onValueChange = { it ->
@@ -147,10 +127,10 @@ fun ContentCadastro(cadastroViewModel: CadastroViewModel) {
                 capitalization = KeyboardCapitalization.Sentences
             ),
             isError = isNomeEror,
-            supportingText = { if (isNomeEror) Text("Digite seu nome") },
+            supportingText = { if (isNomeEror) Text(stringResource(R.string.digite_seu_nome)) },
             placeholder = {
                 Text(
-                    text = "Nome (Obrigatório)",
+                    text = stringResource(R.string.nome_obrigat_rio),
                     fontFamily = myFontBody,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
@@ -186,7 +166,7 @@ fun ContentCadastro(cadastroViewModel: CadastroViewModel) {
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
             placeholder = {
                 Text(
-                    text = "Idade (Opcional)",
+                    text = stringResource(R.string.idade_opcional),
                     fontFamily = myFontBody,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
@@ -235,7 +215,7 @@ fun ContentCadastro(cadastroViewModel: CadastroViewModel) {
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Decimal),
             placeholder = {
                 Text(
-                    text = "Peso (Kg) (Opcional)",
+                    text = stringResource(R.string.peso_kg_opcional),
                     fontFamily = myFontBody,
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp,
@@ -260,15 +240,18 @@ fun ContentCadastro(cadastroViewModel: CadastroViewModel) {
                     enabledButton = false
                     val usuario =
                         Usuario(
+                            id = uiState.usuario.id,
                             nome = nome,
                             idade = idade.toByteOrNull() ?: -1,
                             peso = peso.toFloatOrNull() ?: -1f,
-                            idPlanoTreinoPrincipal = -1,
-                            idPlanoDietaPrincipal = -1
+                            idPlanoTreinoPrincipal = uiState.usuario.idPlanoTreinoPrincipal,
+                            idPlanoDietaPrincipal = uiState.usuario.idPlanoDietaPrincipal
                         )
                     coroutineScope.launch {
-                        cadastroViewModel.addUser(usuario)
+                        viewModel.updateUser(usuario)
                     }
+                    Toast.makeText(ctx, "Dados alterados com sucesso.", Toast.LENGTH_SHORT).show()
+                    navControllerConfiguracoes.popBackStack("configuracoes", false)
                 } else {
                     isNomeEror = true
                 }
@@ -286,7 +269,7 @@ fun ContentCadastro(cadastroViewModel: CadastroViewModel) {
             shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
         ) {
             Text(
-                text = "SALVAR",
+                text = stringResource(R.string.salvar),
                 fontFamily = myFontTitle,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,

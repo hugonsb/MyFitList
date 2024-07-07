@@ -566,7 +566,8 @@ fun CustomAlertDialogCadastroExercicio(
                     shape = RoundedCornerShape(10.dp),
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
-                        .width(120.dp).height(50.dp)
+                        .width(120.dp)
+                        .height(50.dp)
                 ) {
                     Text(
                         text = stringResource(R.string.ok),
