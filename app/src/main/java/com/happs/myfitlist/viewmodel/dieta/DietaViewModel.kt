@@ -34,6 +34,13 @@ class DietaViewModel(
     }
 
     private suspend fun atualizarEstado() {
+
+        _dietaState.update { currentState ->
+            currentState.copy(
+                isLoaded = false
+            )
+        }
+
         val usuarioFlow = treinoRepository.getUsuario()
         val usuario = usuarioFlow.first()
 
@@ -66,7 +73,8 @@ class DietaViewModel(
                         idUsuario = -1
                     ),
                     listaPlanosDieta = treinoRepository.getPlanosDieta().first(),
-                    diasComRefeicoes = diasComRefeicoes
+                    diasComRefeicoes = diasComRefeicoes,
+                    isLoaded = true
                 )
             }
         }

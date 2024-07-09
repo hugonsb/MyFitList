@@ -35,6 +35,13 @@ class TreinoViewModel(
     }
 
     private suspend fun atualizarEstado() {
+
+        _treinoState.update { currentState ->
+            currentState.copy(
+                isLoaded = false
+            )
+        }
+
         val usuarioFlow = treinoRepository.getUsuario()
         val usuario = usuarioFlow.first()
 
@@ -67,7 +74,8 @@ class TreinoViewModel(
                         idUsuario = -1
                     ),
                     listaPlanosTreino = treinoRepository.getPlanosTreino().first(),
-                    diasComExercicios = diasComExercicios
+                    diasComExercicios = diasComExercicios,
+                    isLoaded = true
                 )
             }
         }

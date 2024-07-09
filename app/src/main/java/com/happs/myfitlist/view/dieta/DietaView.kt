@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -78,7 +79,7 @@ import com.happs.myfitlist.viewmodel.dieta.DietaViewModel
 fun DietaView(
     navController: NavHostController,
     viewModel: DietaViewModel = viewModel(factory = AppViewModelProvider.Factory)
-){
+) {
     val uiState by viewModel.dietaState.collectAsState()
 
     var expandedPlanoDietaList by remember { mutableStateOf(false) }
@@ -87,66 +88,80 @@ fun DietaView(
 
     val usuario = uiState.usuario
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary)
-            .padding(start = 10.dp, end = 10.dp, top = 5.dp),
-    ) {
-
-        Header(usuario = uiState.usuario)
-
-        Spacer(modifier = Modifier.height(15.dp))
-
+    if (!uiState.isLoaded) {
         Column(
-            modifier = Modifier.animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioNoBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primary),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            CircularProgressIndicator(
+                color = MyWhite
             )
+        }
+    } else {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(start = 10.dp, end = 10.dp, top = 5.dp),
         ) {
 
-            if (expandedPlanoDietaList && uiState.listaPlanosDieta.isNotEmpty()) {
-                PlanosDietaList(
-                    listPlanoDieta = uiState.listaPlanosDieta,
-                    planoDietaPrincipal = uiState.planoDietaPrincipal,
-                    listPlanoDietaState = listPlanoDietaState,
-                    usuario = usuario,
-                    viewModel = viewModel,
-                    selecionarPlano = { expandedPlanoDietaList = false }
-                )
-            } else if (usuario.idPlanoDietaPrincipal != -1) {
+            Header(usuario = uiState.usuario)
 
-                PlanoDietaPrincipal(
-                    planoDietaPrincipal = uiState.planoDietaPrincipal,
-                    usuario = usuario,
-                    navController = navController,
-                    clickPlano = { expandedPlanoDietaList = true }
+            Spacer(modifier = Modifier.height(15.dp))
+
+            Column(
+                modifier = Modifier.animateContentSize(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessLow
+                    )
                 )
+            ) {
+
+                if (expandedPlanoDietaList && uiState.listaPlanosDieta.isNotEmpty()) {
+                    PlanosDietaList(
+                        listPlanoDieta = uiState.listaPlanosDieta,
+                        planoDietaPrincipal = uiState.planoDietaPrincipal,
+                        listPlanoDietaState = listPlanoDietaState,
+                        usuario = usuario,
+                        viewModel = viewModel,
+                        selecionarPlano = { expandedPlanoDietaList = false }
+                    )
+                } else if (usuario.idPlanoDietaPrincipal != -1) {
+
+                    PlanoDietaPrincipal(
+                        planoDietaPrincipal = uiState.planoDietaPrincipal,
+                        usuario = usuario,
+                        navController = navController,
+                        clickPlano = { expandedPlanoDietaList = true }
+                    )
+                }
             }
-        }
 
-        Box {
+            Box {
 
-            DiasRefeicaoList(listDiaDieta = uiState.diasComRefeicoes)
+                DiasRefeicaoList(listDiaDieta = uiState.diasComRefeicoes)
 
-            FloatingActionButton(modifier = Modifier
-                .padding(bottom = 10.dp)
-                .size(55.dp)
-                .align(Alignment.BottomEnd),
-                containerColor = MaterialTheme.colorScheme.onSecondary,
-                contentColor = MyWhite,
-                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 3.dp),
-                shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp),
-                onClick = {
-                    navController.navigate("criar_plano_alimentar") { launchSingleTop = true }
-                }) {
-                Icon(
-                    imageVector = Icons.Default.Add,
-                    contentDescription = null,
-                    modifier = Modifier.size(30.dp)
-                )
+                FloatingActionButton(modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .size(55.dp)
+                    .align(Alignment.BottomEnd),
+                    containerColor = MaterialTheme.colorScheme.onSecondary,
+                    contentColor = MyWhite,
+                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 3.dp),
+                    shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp),
+                    onClick = {
+                        navController.navigate("criar_plano_alimentar") { launchSingleTop = true }
+                    }) {
+                    Icon(
+                        imageVector = Icons.Default.Add,
+                        contentDescription = null,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
             }
         }
     }
