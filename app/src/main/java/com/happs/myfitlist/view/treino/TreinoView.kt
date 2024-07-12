@@ -458,6 +458,7 @@ fun DiasTreinoList(
     }
 }
 
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CustomPagerDiaTreino(listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>) {
@@ -496,6 +497,7 @@ fun CustomPagerDiaTreino(listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>)
                         .verticalScroll(scrollState)
                         .padding(bottom = 75.dp),
                     state = pagerState,
+                    beyondBoundsPageCount = 7,
                     verticalAlignment = Alignment.Top,
                     key = { pageIndex -> pageIndex }
                 ) { currentPage ->

@@ -180,6 +180,7 @@ fun CriarPlanoTreinoView(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState),
+                    beyondBoundsPageCount = 7,
                     state = pagerState,
                     verticalAlignment = Alignment.Top,
                     key = { pageIndex -> pageIndex }

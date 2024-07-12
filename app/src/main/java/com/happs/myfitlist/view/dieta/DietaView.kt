@@ -452,6 +452,7 @@ fun CustomPagerDiaDieta(listDiaDieta: Array<Pair<DiaDieta, List<Refeicao>>>) {
                         .fillMaxSize()
                         .verticalScroll(scrollState)
                         .padding(bottom = 75.dp),
+                    beyondBoundsPageCount = 7,
                     state = pagerState,
                     verticalAlignment = Alignment.Top,
                     key = { pageIndex -> pageIndex }
