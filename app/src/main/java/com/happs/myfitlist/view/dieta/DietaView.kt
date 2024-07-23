@@ -439,89 +439,85 @@ fun CustomPagerDiaDieta(listDiaDieta: Array<Pair<DiaDieta, List<Refeicao>>>) {
 
         Spacer(modifier = Modifier.height(5.dp))
 
-        Column(
+        Box(
             modifier = Modifier
                 .weight(1f)
         ) {
-            Box(
+            HorizontalPager(
                 modifier = Modifier
-                    .weight(1f)
-            ) {
-                HorizontalPager(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState)
-                        .padding(bottom = 75.dp),
-                    beyondBoundsPageCount = 7,
-                    state = pagerState,
-                    verticalAlignment = Alignment.Top,
-                    key = { pageIndex -> pageIndex }
-                ) { currentPage ->
-                    Card(
-                        shape = CutCornerShape(topStart = 15.dp, bottomEnd = 15.dp)
+                    .fillMaxSize()
+                    .verticalScroll(scrollState)
+                    .padding(bottom = 75.dp),
+                beyondBoundsPageCount = 7,
+                state = pagerState,
+                verticalAlignment = Alignment.Top,
+                key = { pageIndex -> pageIndex }
+            ) { currentPage ->
+                Card(
+                    shape = CutCornerShape(topStart = 15.dp, bottomEnd = 15.dp)
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .background(MyWhite)
+                            .fillMaxWidth()
+                            .padding(10.dp)
                     ) {
-                        Column(
-                            modifier = Modifier
-                                .background(MyWhite)
-                                .fillMaxWidth()
-                                .padding(10.dp)
-                        ) {
-                            Text(
-                                text = listDiaDieta[currentPage].first.dia,
-                                fontFamily = myFontTitle,
-                                fontSize = 20.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MyBlack,
-                            )
+                        Text(
+                            text = listDiaDieta[currentPage].first.dia,
+                            fontFamily = myFontTitle,
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = MyBlack,
+                        )
 
-                            for ((index, refeicao) in listDiaDieta[currentPage].second.withIndex()) {
-                                Row(
-                                    modifier = Modifier.padding(vertical = 6.dp),
-                                    verticalAlignment = Alignment.Top
-                                ) {
-                                    Icon(
-                                        tint = MyRed,
-                                        painter = painterResource(id = R.drawable.food_icon),
-                                        contentDescription = null,
-                                        modifier = Modifier.size(40.dp)
+                        for ((index, refeicao) in listDiaDieta[currentPage].second.withIndex()) {
+                            Row(
+                                modifier = Modifier.padding(vertical = 6.dp),
+                                verticalAlignment = Alignment.Top
+                            ) {
+                                Icon(
+                                    tint = MyRed,
+                                    painter = painterResource(id = R.drawable.food_icon),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(40.dp)
+                                )
+
+                                Spacer(modifier = Modifier.width(8.dp))
+
+                                Column {
+                                    Spacer(modifier = Modifier.height(3.dp))
+                                    Text(
+                                        text = refeicao.tipo,
+                                        fontFamily = myFontTitle,
+                                        fontSize = 20.sp,
+                                        lineHeight = 19.sp,
+                                        color = MyRed,
                                     )
-
-                                    Spacer(modifier = Modifier.width(8.dp))
-
-                                    Column {
-                                        Spacer(modifier = Modifier.height(3.dp))
-                                        Text(
-                                            text = refeicao.tipo,
-                                            fontFamily = myFontTitle,
-                                            fontSize = 20.sp,
-                                            lineHeight = 19.sp,
-                                            color = MyRed,
-                                        )
-                                        Text(
-                                            text = refeicao.detalhes,
-                                            fontFamily = myFontBody,
-                                            fontSize = 15.sp,
-                                            lineHeight = 19.sp,
-                                            color = MyBlack,
-                                        )
-                                    }
-                                }
-
-                                if (index < listDiaDieta[currentPage].second.size - 1) {
-                                    Spacer(modifier = Modifier.height(10.dp))
-                                    Spacer(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .height(0.6.dp)
-                                            .background(Color.Gray)
+                                    Text(
+                                        text = refeicao.detalhes,
+                                        fontFamily = myFontBody,
+                                        fontSize = 15.sp,
+                                        lineHeight = 19.sp,
+                                        color = MyBlack,
                                     )
-                                    Spacer(modifier = Modifier.height(10.dp))
                                 }
+                            }
+
+                            if (index < listDiaDieta[currentPage].second.size - 1) {
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Spacer(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(0.6.dp)
+                                        .background(Color.Gray)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
                             }
                         }
                     }
                 }
             }
         }
+
     }
 }
