@@ -36,7 +36,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.happs.myfitlist.R
 import com.happs.myfitlist.model.usuario.Usuario
@@ -44,14 +43,14 @@ import com.happs.myfitlist.ui.theme.MyWhite
 import com.happs.myfitlist.ui.theme.TextFieldColors.colorsTextFieldsCadastro
 import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
-import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.cadastro.CadastroViewModel
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun CadastroView(
     navController: NavController,
-    cadastroViewModel: CadastroViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    cadastroViewModel: CadastroViewModel = koinViewModel<CadastroViewModel>()
 ) {
     val uiCadastroState by cadastroViewModel.cadastroState.collectAsState()
 

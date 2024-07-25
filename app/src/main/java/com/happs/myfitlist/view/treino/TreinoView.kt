@@ -63,7 +63,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.happs.myfitlist.R
 import com.happs.myfitlist.model.treino.DiaTreino
@@ -80,13 +79,13 @@ import com.happs.myfitlist.util.CustomAlertDialog
 import com.happs.myfitlist.util.DiasList
 import com.happs.myfitlist.util.func.getCurrentDayOfWeekIndex
 import com.happs.myfitlist.util.pager.PageIndicator
-import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.treino.TreinoViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun TreinoView(
     navController: NavHostController,
-    viewModel: TreinoViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    treinoViewModel: TreinoViewModel = koinViewModel<TreinoViewModel>()
 ) {
 
     val ctx = LocalContext.current
@@ -124,7 +123,7 @@ fun TreinoView(
         }
     }
 
-    val uiState by viewModel.treinoState.collectAsState()
+    val uiState by treinoViewModel.treinoState.collectAsState()
 
     var expandedPlanoTreinoList by remember { mutableStateOf(false) }
 
@@ -171,7 +170,7 @@ fun TreinoView(
                         planoTreinoPrincipal = uiState.planoTreinoPrincipal,
                         listPlanoTreinoState = listPlanoTreinoState,
                         usuario = usuario,
-                        viewModel = viewModel,
+                        treinoViewModel = treinoViewModel,
                         selecionarPlano = { expandedPlanoTreinoList = false }
                     )
                 } else if (usuario.idPlanoTreinoPrincipal != -1) {
@@ -301,7 +300,7 @@ fun PlanosTreinoList(
     planoTreinoPrincipal: PlanoTreino,
     listPlanoTreinoState: LazyListState,
     usuario: Usuario,
-    viewModel: TreinoViewModel,
+    treinoViewModel: TreinoViewModel,
     selecionarPlano: () -> Unit
 ) {
 
@@ -316,7 +315,7 @@ fun PlanosTreinoList(
             onclose = { openDialog.value = false },
             onConfirm = {
                 planoTreinoParaExcluir.value?.let {
-                    viewModel.excluirPlanoTreino(it)
+                    treinoViewModel.excluirPlanoTreino(it)
                 }
                 openDialog.value = false
             }
@@ -365,7 +364,7 @@ fun PlanosTreinoList(
                                 Row(
                                     modifier = Modifier
                                         .clickable {
-                                            viewModel.atualizarPlanoTreinoPrincipal(
+                                            treinoViewModel.atualizarPlanoTreinoPrincipal(
                                                 usuario.id,
                                                 it.id
                                             )

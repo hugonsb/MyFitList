@@ -55,7 +55,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.happs.myfitlist.R
 import com.happs.myfitlist.model.dieta.Refeicao
@@ -71,19 +70,19 @@ import com.happs.myfitlist.util.CustomAlertDialog
 import com.happs.myfitlist.util.CustomTopAppBar
 import com.happs.myfitlist.util.DiasList
 import com.happs.myfitlist.util.pager.PageIndicator
-import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.dieta.CriarPlanoDietaViewModel
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CriarPlanoAlimentarView(
     navController: NavHostController,
-    viewModel: CriarPlanoDietaViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    criarPlanoDietaViewModel: CriarPlanoDietaViewModel = koinViewModel<CriarPlanoDietaViewModel>()
 ) {
 
     val coroutineScope = rememberCoroutineScope()
-    val uiState by viewModel.criarPlanoDietaState.collectAsState()
+    val uiState by criarPlanoDietaViewModel.criarPlanoDietaState.collectAsState()
 
     var isNomePlanoDietaError by rememberSaveable { mutableStateOf(false) }
 
@@ -131,7 +130,7 @@ fun CriarPlanoAlimentarView(
             value = uiState.nomePlanoDieta,
             onValueChange = {
                 if (it.length <= 100) {
-                    viewModel.setNomePlanoDieta(it)
+                    criarPlanoDietaViewModel.setNomePlanoDieta(it)
                     isNomePlanoDietaError = false
                 }
             },
@@ -187,7 +186,7 @@ fun CriarPlanoAlimentarView(
                     verticalAlignment = Alignment.Top,
                     key = { pageIndex -> pageIndex }
                 ) { currentPage ->
-                    CustomCardCadastroDiaSemanaDieta(currentPage)
+                    CustomCardCadastroDiaSemanaDieta(currentPage, criarPlanoDietaViewModel)
                 }
             }
         }
@@ -197,7 +196,7 @@ fun CriarPlanoAlimentarView(
                 onClick = {
                     coroutineScope.launch {
                         enabledButton = false
-                        val (success, message) = viewModel.savePlanoDieta()
+                        val (success, message) = criarPlanoDietaViewModel.savePlanoDieta()
                         if (success) {
                             navController.popBackStack("dieta", false)
                         } else {
@@ -228,14 +227,12 @@ fun CriarPlanoAlimentarView(
 @Composable
 fun CustomCardCadastroDiaSemanaDieta(
     indiceDia: Int,
-    viewModel: CriarPlanoDietaViewModel = viewModel(
-        factory = AppViewModelProvider.Factory
-    )
+    criarPlanoDietaViewModel : CriarPlanoDietaViewModel
 ) {
 
     LocalFocusManager.current.clearFocus()
 
-    val uiState by viewModel.criarPlanoDietaState.collectAsState()
+    val uiState by criarPlanoDietaViewModel.criarPlanoDietaState.collectAsState()
 
     var enabledButton by remember { mutableStateOf(true) }
 
@@ -296,7 +293,7 @@ fun CustomCardCadastroDiaSemanaDieta(
                         Icon(
                             modifier = Modifier
                                 .clickable {
-                                    viewModel.removerRefeicao(indiceDia, refeicao)
+                                    criarPlanoDietaViewModel.removerRefeicao(indiceDia, refeicao)
                                 },
                             tint = MyWhite,
                             painter = painterResource(id = R.drawable.baseline_close_24),
@@ -317,7 +314,8 @@ fun CustomCardCadastroDiaSemanaDieta(
                     onClickCancelar = {
                         openDialog.value = false
                         enabledButton = true
-                    })
+                    },
+                    criarPlanoDietaViewModel)
             }
 
             OutlinedButton(
@@ -353,11 +351,9 @@ fun CustomAlertDialogCadastroRefeicao(
     dia: Int,
     onClickOk: () -> Unit,
     onClickCancelar: () -> Unit,
-    viewiewModel: CriarPlanoDietaViewModel = viewModel(
-        factory = AppViewModelProvider.Factory
-    )
+    criarPlanoDietaViewModel : CriarPlanoDietaViewModel
 ) {
-    val uiState by viewiewModel.criarPlanoDietaState.collectAsState()
+    val uiState by criarPlanoDietaViewModel.criarPlanoDietaState.collectAsState()
 
     var isTipoRefeicaoError by rememberSaveable { mutableStateOf(false) }
     var isDetalhesRefeicaoError by rememberSaveable { mutableStateOf(false) }
@@ -389,7 +385,7 @@ fun CustomAlertDialogCadastroRefeicao(
                     value = uiState.tipoRefeicao[dia],
                     onValueChange = {
                         if (it.length <= 200) {
-                            viewiewModel.setTipoRefeicao(dia, it)
+                            criarPlanoDietaViewModel.setTipoRefeicao(dia, it)
                             isTipoRefeicaoError = false
                         }
                     },
@@ -423,7 +419,7 @@ fun CustomAlertDialogCadastroRefeicao(
                     value = uiState.detalhesRefeicao[dia],
                     onValueChange = {
                         if (it.length <= 500) {
-                            viewiewModel.setDetalhesRefeicao(dia, it)
+                            criarPlanoDietaViewModel.setDetalhesRefeicao(dia, it)
                             isDetalhesRefeicaoError = false
                         }
                     },
@@ -491,7 +487,7 @@ fun CustomAlertDialogCadastroRefeicao(
                                         tipoRefeicao,
                                         detalhesRefeicao,
                                         onClickOk,
-                                        viewiewModel
+                                        criarPlanoDietaViewModel
                                     )
                                 }
                             } else {
@@ -500,7 +496,7 @@ fun CustomAlertDialogCadastroRefeicao(
                                     tipoRefeicao,
                                     detalhesRefeicao,
                                     onClickOk,
-                                    viewiewModel
+                                    criarPlanoDietaViewModel
                                 )
                             }
 
@@ -552,9 +548,9 @@ fun adicionarRefeicao(
     tipo: String,
     detalhes: String,
     onClickOk: () -> Unit,
-    viewiewModel: CriarPlanoDietaViewModel
+    criarPlanoDietaViewModel : CriarPlanoDietaViewModel
 ) {
-    viewiewModel.adicionarRefeicao(
+    criarPlanoDietaViewModel.adicionarRefeicao(
         indiceDia,
         Refeicao(
             tipo = tipo,
@@ -563,7 +559,7 @@ fun adicionarRefeicao(
         )
     )
 
-    viewiewModel.setTipoRefeicao(indiceDia, "")
-    viewiewModel.setDetalhesRefeicao(indiceDia, "")
+    criarPlanoDietaViewModel.setTipoRefeicao(indiceDia, "")
+    criarPlanoDietaViewModel.setDetalhesRefeicao(indiceDia, "")
     onClickOk()
 }

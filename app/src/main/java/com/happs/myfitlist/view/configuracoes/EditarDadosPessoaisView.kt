@@ -36,7 +36,6 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.happs.myfitlist.R
 import com.happs.myfitlist.model.usuario.Usuario
@@ -46,14 +45,14 @@ import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.util.CustomAlertDialog
 import com.happs.myfitlist.util.CustomTopAppBar
-import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.configuracoes.EditarDadosPessoaisViewModel
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun EditarDadosPessoaisView(
     navControllerConfiguracoes: NavController,
-    viewModel: EditarDadosPessoaisViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    editarDadosPessoaisViewModel: EditarDadosPessoaisViewModel = koinViewModel<EditarDadosPessoaisViewModel>()
 ) {
 
     val openDialog = remember { mutableStateOf(false) }
@@ -83,7 +82,7 @@ fun EditarDadosPessoaisView(
             barTitle = stringResource(R.string.alterar_dados_pessoais)
         )
 
-        Content(viewModel, navControllerConfiguracoes)
+        Content(editarDadosPessoaisViewModel, navControllerConfiguracoes)
     }
 }
 

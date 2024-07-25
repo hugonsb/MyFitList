@@ -31,22 +31,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.happs.myfitlist.R
 import com.happs.myfitlist.ui.theme.MyBlack
 import com.happs.myfitlist.ui.theme.MyWhite
 import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.util.CustomAlertDialog
-import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.cadastro.CadastroViewModel
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun ConfiguracoesView(
     navControllerConfiguracoes: NavController,
     navControllerCadastro: NavController,
-    viewModel: CadastroViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    cadastroViewModel: CadastroViewModel = koinViewModel<CadastroViewModel>()
 ) {
     Column(
         modifier = Modifier
@@ -56,7 +55,7 @@ fun ConfiguracoesView(
     ) {
         Header()
         Spacer(modifier = Modifier.height(20.dp))
-        Menu(navControllerConfiguracoes, navControllerCadastro, viewModel)
+        Menu(navControllerConfiguracoes, navControllerCadastro, cadastroViewModel)
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -136,7 +135,9 @@ fun Menu(
                 .height(70.dp)
                 .padding(horizontal = 10.dp)
                 .clickable(true, onClick = {
-                    navControllerConfiguracoes.navigate("editar_dados_pessoais") { launchSingleTop = true }
+                    navControllerConfiguracoes.navigate("editar_dados_pessoais") {
+                        launchSingleTop = true
+                    }
                 }),
             shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp),
         ) {

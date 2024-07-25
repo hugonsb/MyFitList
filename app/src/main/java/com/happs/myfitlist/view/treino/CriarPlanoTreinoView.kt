@@ -53,7 +53,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.happs.myfitlist.R
 import com.happs.myfitlist.model.treino.Exercicio
@@ -69,19 +68,19 @@ import com.happs.myfitlist.util.CustomAlertDialog
 import com.happs.myfitlist.util.CustomTopAppBar
 import com.happs.myfitlist.util.DiasList
 import com.happs.myfitlist.util.pager.PageIndicator
-import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.treino.CriarPlanoTreinoViewModel
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun CriarPlanoTreinoView(
     navController: NavHostController,
-    viewModel: CriarPlanoTreinoViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    criarPlanoDietaViewModel: CriarPlanoTreinoViewModel = koinViewModel<CriarPlanoTreinoViewModel>()
 ) {
 
     val coroutineScope = rememberCoroutineScope()
-    val uiState by viewModel.criarPlanoTreinoState.collectAsState()
+    val uiState by criarPlanoDietaViewModel.criarPlanoTreinoState.collectAsState()
 
     var isNomePlanoTreinoError by rememberSaveable { mutableStateOf(false) }
 
@@ -129,7 +128,7 @@ fun CriarPlanoTreinoView(
             value = uiState.nomePlanoTreino,
             onValueChange = {
                 if (it.length <= 100) {
-                    viewModel.setNomePlanoTreino(it)
+                    criarPlanoDietaViewModel.setNomePlanoTreino(it)
                     isNomePlanoTreinoError = false
                 }
             },
@@ -185,7 +184,7 @@ fun CriarPlanoTreinoView(
                     verticalAlignment = Alignment.Top,
                     key = { pageIndex -> pageIndex }
                 ) { currentPage ->
-                    CustomCardCadastroDiaSemanaTreino(currentPage)
+                    CustomCardCadastroDiaSemanaTreino(currentPage, criarPlanoDietaViewModel)
                 }
             }
         }
@@ -195,7 +194,7 @@ fun CriarPlanoTreinoView(
                 onClick = {
                     coroutineScope.launch {
                         enabledButton = false
-                        val (success, message) = viewModel.savePlanoTreino()
+                        val (success, message) = criarPlanoDietaViewModel.savePlanoTreino()
                         if (success) {
                             navController.popBackStack("treino", false)
                         } else {
@@ -226,14 +225,12 @@ fun CriarPlanoTreinoView(
 @Composable
 fun CustomCardCadastroDiaSemanaTreino(
     indiceDia: Int,
-    viewModel: CriarPlanoTreinoViewModel = viewModel(
-        factory = AppViewModelProvider.Factory
-    )
+    criarPlanoTreinoViewModel: CriarPlanoTreinoViewModel
 ) {
 
     LocalFocusManager.current.clearFocus()
 
-    val uiState by viewModel.criarPlanoTreinoState.collectAsState()
+    val uiState by criarPlanoTreinoViewModel.criarPlanoTreinoState.collectAsState()
 
     var isGrupoMuscularError by rememberSaveable { mutableStateOf(false) }
 
@@ -269,7 +266,7 @@ fun CustomCardCadastroDiaSemanaTreino(
                     value = uiState.grupoMuscular[indiceDia],
                     onValueChange = {
                         if (it.length <= 100) {
-                            viewModel.setGrupoMuscular(indiceDia, it)
+                            criarPlanoTreinoViewModel.setGrupoMuscular(indiceDia, it)
                             isGrupoMuscularError = false
                         }
                     },
@@ -323,7 +320,10 @@ fun CustomCardCadastroDiaSemanaTreino(
                             Icon(
                                 modifier = Modifier
                                     .clickable {
-                                        viewModel.removerExercicio(indiceDia, exercicio)
+                                        criarPlanoTreinoViewModel.removerExercicio(
+                                            indiceDia,
+                                            exercicio
+                                        )
                                     },
                                 tint = MyWhite,
                                 painter = painterResource(id = R.drawable.baseline_close_24),
@@ -344,7 +344,9 @@ fun CustomCardCadastroDiaSemanaTreino(
                         onClickCancelar = {
                             openDialog.value = false
                             enabledButton = true
-                        })
+                        },
+                        criarPlanoTreinoViewModel
+                    )
                 }
 
                 OutlinedButton(
@@ -380,11 +382,9 @@ fun CustomAlertDialogCadastroExercicio(
     dia: Int,
     onClickOk: () -> Unit,
     onClickCancelar: () -> Unit,
-    viewiewModel: CriarPlanoTreinoViewModel = viewModel(
-        factory = AppViewModelProvider.Factory
-    )
+    criarPlanoTreinoViewModel: CriarPlanoTreinoViewModel
 ) {
-    val uiState by viewiewModel.criarPlanoTreinoState.collectAsState()
+    val uiState by criarPlanoTreinoViewModel.criarPlanoTreinoState.collectAsState()
 
     var isNomeExercicioError by rememberSaveable { mutableStateOf(false) }
     var isNumeroSeriesError by rememberSaveable { mutableStateOf(false) }
@@ -415,7 +415,7 @@ fun CustomAlertDialogCadastroExercicio(
                     value = uiState.nomeExercicio[dia],
                     onValueChange = {
                         if (it.length <= 100) {
-                            viewiewModel.setNomeExercicio(dia, it)
+                            criarPlanoTreinoViewModel.setNomeExercicio(dia, it)
                             isNomeExercicioError = false
                         }
                     },
@@ -452,11 +452,11 @@ fun CustomAlertDialogCadastroExercicio(
                         onValueChange = {
                             if (it.matches(pattern)) {
                                 if (it.isNotEmpty()) {
-                                    viewiewModel.setNumeroSeries(
+                                    criarPlanoTreinoViewModel.setNumeroSeries(
                                         dia, it.toInt().coerceAtMost(15).toString()
                                     )
                                 } else {
-                                    viewiewModel.setNumeroSeries(dia, it)
+                                    criarPlanoTreinoViewModel.setNumeroSeries(dia, it)
                                 }
                                 isNumeroSeriesError = false
                             }
@@ -492,12 +492,12 @@ fun CustomAlertDialogCadastroExercicio(
                         onValueChange = {
                             if (it.matches(pattern)) {
                                 if (it.isNotEmpty()) {
-                                    viewiewModel.setNumeroRepeticoes(
+                                    criarPlanoTreinoViewModel.setNumeroRepeticoes(
                                         dia,
                                         it.toInt().coerceAtMost(40).toString()
                                     )
                                 } else {
-                                    viewiewModel.setNumeroRepeticoes(dia, it)
+                                    criarPlanoTreinoViewModel.setNumeroRepeticoes(dia, it)
                                 }
                                 isNumeroRepeticoesError = false
                             }
@@ -537,7 +537,7 @@ fun CustomAlertDialogCadastroExercicio(
 
                         if (nomeExercicio.isNotEmpty() && numeroSeries.isNotEmpty() && numeroRepeticoes.isNotEmpty()) {
 
-                            viewiewModel.adicionarExercicio(
+                            criarPlanoTreinoViewModel.adicionarExercicio(
                                 dia,
                                 Exercicio(
                                     nome = nomeExercicio,
@@ -547,9 +547,9 @@ fun CustomAlertDialogCadastroExercicio(
                                 )
                             )
 
-                            viewiewModel.setNomeExercicio(dia, "")
-                            viewiewModel.setNumeroSeries(dia, "")
-                            viewiewModel.setNumeroRepeticoes(dia, "")
+                            criarPlanoTreinoViewModel.setNomeExercicio(dia, "")
+                            criarPlanoTreinoViewModel.setNumeroSeries(dia, "")
+                            criarPlanoTreinoViewModel.setNumeroRepeticoes(dia, "")
                             onClickOk()
                         } else {
                             if (nomeExercicio.isEmpty()) {

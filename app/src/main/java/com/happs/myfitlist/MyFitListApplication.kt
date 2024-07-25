@@ -1,18 +1,18 @@
 package com.happs.myfitlist
 
 import android.app.Application
-import com.happs.myfitlist.room.AppContainer
-import com.happs.myfitlist.room.AppDataContainer
+import com.happs.myfitlist.di.appModule
+import com.happs.myfitlist.di.dbModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
 
 class MyFitListApplication : Application() {
-
-    /**
-     * AppContainer instance used by the rest of classes to obtain dependencies
-     */
-    lateinit var container: AppContainer
-
     override fun onCreate() {
         super.onCreate()
-        container = AppDataContainer(this)
+        startKoin {
+            //androidLogger(level = Level.DEBUG) //ver logs do koin
+            androidContext(this@MyFitListApplication)
+            modules(appModule, dbModule)
+        }
     }
 }

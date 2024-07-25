@@ -55,7 +55,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.happs.myfitlist.R
 import com.happs.myfitlist.model.dieta.DiaDieta
@@ -72,15 +71,15 @@ import com.happs.myfitlist.util.CustomAlertDialog
 import com.happs.myfitlist.util.DiasList
 import com.happs.myfitlist.util.func.getCurrentDayOfWeekIndex
 import com.happs.myfitlist.util.pager.PageIndicator
-import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.dieta.DietaViewModel
+import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun DietaView(
     navController: NavHostController,
-    viewModel: DietaViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    criarPlanoDietaViewModel: DietaViewModel = koinViewModel<DietaViewModel>()
 ) {
-    val uiState by viewModel.dietaState.collectAsState()
+    val uiState by criarPlanoDietaViewModel.dietaState.collectAsState()
 
     var expandedPlanoDietaList by remember { mutableStateOf(false) }
 
@@ -127,7 +126,7 @@ fun DietaView(
                         planoDietaPrincipal = uiState.planoDietaPrincipal,
                         listPlanoDietaState = listPlanoDietaState,
                         usuario = usuario,
-                        viewModel = viewModel,
+                        dietaViewModel = criarPlanoDietaViewModel,
                         selecionarPlano = { expandedPlanoDietaList = false }
                     )
                 } else if (usuario.idPlanoDietaPrincipal != -1) {
@@ -258,7 +257,7 @@ fun PlanosDietaList(
     planoDietaPrincipal: PlanoDieta,
     listPlanoDietaState: LazyListState,
     usuario: Usuario,
-    viewModel: DietaViewModel,
+    dietaViewModel: DietaViewModel,
     selecionarPlano: () -> Unit
 ) {
 
@@ -273,7 +272,7 @@ fun PlanosDietaList(
             onclose = { openDialog.value = false },
             onConfirm = {
                 planoDietaParaExcluir.value?.let {
-                    viewModel.excluirPlanoDieta(it)
+                    dietaViewModel.excluirPlanoDieta(it)
                 }
                 openDialog.value = false
             }
@@ -322,7 +321,7 @@ fun PlanosDietaList(
                                 Row(
                                     modifier = Modifier
                                         .clickable {
-                                            viewModel.atualizarPlanoDietaPrincipal(
+                                            dietaViewModel.atualizarPlanoDietaPrincipal(
                                                 usuario.id,
                                                 it.id
                                             )

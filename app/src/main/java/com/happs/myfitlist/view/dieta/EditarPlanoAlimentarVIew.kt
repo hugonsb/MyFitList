@@ -55,7 +55,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.happs.myfitlist.R
 import com.happs.myfitlist.model.dieta.Refeicao
@@ -71,19 +70,19 @@ import com.happs.myfitlist.util.CustomAlertDialog
 import com.happs.myfitlist.util.CustomTopAppBar
 import com.happs.myfitlist.util.DiasList
 import com.happs.myfitlist.util.pager.PageIndicator
-import com.happs.myfitlist.viewmodel.AppViewModelProvider
 import com.happs.myfitlist.viewmodel.dieta.EditarPlanoDietaViewModel
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun EditarPlanoAlimentarVIew(
     navController: NavHostController,
     planoAlimentarId: Int,
-    viewModel: EditarPlanoDietaViewModel = viewModel(factory = AppViewModelProvider.Factory)
+    criarPlanoDietaViewModel: EditarPlanoDietaViewModel = koinViewModel<EditarPlanoDietaViewModel>()
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val uiState by viewModel.editarPlanoDietaState.collectAsState()
+    val uiState by criarPlanoDietaViewModel.editarPlanoDietaState.collectAsState()
 
     var isNomePlanoDietaError by rememberSaveable { mutableStateOf(false) }
 
@@ -131,7 +130,7 @@ fun EditarPlanoAlimentarVIew(
             value = uiState.nomePlanoDieta,
             onValueChange = {
                 if (it.length <= 100) {
-                    viewModel.setNomePlanoDieta(it)
+                    criarPlanoDietaViewModel.setNomePlanoDieta(it)
                     isNomePlanoDietaError = false
                 }
             },
@@ -187,7 +186,7 @@ fun EditarPlanoAlimentarVIew(
                     verticalAlignment = Alignment.Top,
                     key = { pageIndex -> pageIndex }
                 ) { currentPage ->
-                    CustomCardEditarDiaSemanaDieta(currentPage)
+                    CustomCardEditarDiaSemanaDieta(currentPage, criarPlanoDietaViewModel)
                 }
             }
         }
@@ -197,7 +196,7 @@ fun EditarPlanoAlimentarVIew(
                 onClick = {
                     coroutineScope.launch {
                         enabledButton = false
-                        val (success, message) = viewModel.editarPlanoDieta(planoAlimentarId)
+                        val (success, message) = criarPlanoDietaViewModel.editarPlanoDieta(planoAlimentarId)
                         if (success) {
                             navController.popBackStack("dieta", false)
                         } else {
@@ -228,14 +227,12 @@ fun EditarPlanoAlimentarVIew(
 @Composable
 fun CustomCardEditarDiaSemanaDieta(
     indiceDia: Int,
-    viewModel: EditarPlanoDietaViewModel = viewModel(
-        factory = AppViewModelProvider.Factory
-    )
+    editarPlanoDietaViewModel: EditarPlanoDietaViewModel
 ) {
 
     LocalFocusManager.current.clearFocus()
 
-    val uiState by viewModel.editarPlanoDietaState.collectAsState()
+    val uiState by editarPlanoDietaViewModel.editarPlanoDietaState.collectAsState()
 
     var enabledButton by remember { mutableStateOf(true) }
 
@@ -296,7 +293,7 @@ fun CustomCardEditarDiaSemanaDieta(
                         Icon(
                             modifier = Modifier
                                 .clickable {
-                                    viewModel.removerRefeicao(indiceDia, refeicao)
+                                    editarPlanoDietaViewModel.removerRefeicao(indiceDia, refeicao)
                                 },
                             tint = MyWhite,
                             painter = painterResource(id = R.drawable.baseline_close_24),
@@ -317,7 +314,9 @@ fun CustomCardEditarDiaSemanaDieta(
                     onClickCancelar = {
                         openDialog.value = false
                         enabledButton = true
-                    })
+                    },
+                    editarPlanoDietaViewModel
+                )
             }
 
             OutlinedButton(
@@ -353,11 +352,9 @@ fun CustomAlertDialogEditarRefeicao(
     dia: Int,
     onClickOk: () -> Unit,
     onClickCancelar: () -> Unit,
-    viewiewModel: EditarPlanoDietaViewModel = viewModel(
-        factory = AppViewModelProvider.Factory
-    )
+    editarPlanoDietaViewModel: EditarPlanoDietaViewModel
 ) {
-    val uiState by viewiewModel.editarPlanoDietaState.collectAsState()
+    val uiState by editarPlanoDietaViewModel.editarPlanoDietaState.collectAsState()
 
     var isTipoRefeicaoError by rememberSaveable { mutableStateOf(false) }
     var isDetalhesRefeicaoError by rememberSaveable { mutableStateOf(false) }
@@ -389,7 +386,7 @@ fun CustomAlertDialogEditarRefeicao(
                     value = uiState.tipoRefeicao[dia],
                     onValueChange = {
                         if (it.length <= 200) {
-                            viewiewModel.setTipoRefeicao(dia, it)
+                            editarPlanoDietaViewModel.setTipoRefeicao(dia, it)
                             isTipoRefeicaoError = false
                         }
                     },
@@ -423,7 +420,7 @@ fun CustomAlertDialogEditarRefeicao(
                     value = uiState.detalhesRefeicao[dia],
                     onValueChange = {
                         if (it.length <= 500) {
-                            viewiewModel.setDetalhesRefeicao(dia, it)
+                            editarPlanoDietaViewModel.setDetalhesRefeicao(dia, it)
                             isDetalhesRefeicaoError = false
                         }
                     },
@@ -491,7 +488,7 @@ fun CustomAlertDialogEditarRefeicao(
                                         tipoRefeicao,
                                         detalhesRefeicao,
                                         onClickOk,
-                                        viewiewModel
+                                        editarPlanoDietaViewModel
                                     )
                                 }
                             } else {
@@ -500,7 +497,7 @@ fun CustomAlertDialogEditarRefeicao(
                                     tipoRefeicao,
                                     detalhesRefeicao,
                                     onClickOk,
-                                    viewiewModel
+                                    editarPlanoDietaViewModel
                                 )
                             }
 
@@ -552,9 +549,9 @@ fun adicionarRefeicao(
     tipo: String,
     detalhes: String,
     onClickOk: () -> Unit,
-    viewiewModel: EditarPlanoDietaViewModel
+    editarPlanoDietaViewModel: EditarPlanoDietaViewModel
 ) {
-    viewiewModel.adicionarRefeicao(
+    editarPlanoDietaViewModel.adicionarRefeicao(
         indiceDia,
         Refeicao(
             tipo = tipo,
@@ -563,7 +560,7 @@ fun adicionarRefeicao(
         )
     )
 
-    viewiewModel.setTipoRefeicao(indiceDia, "")
-    viewiewModel.setDetalhesRefeicao(indiceDia, "")
+    editarPlanoDietaViewModel.setTipoRefeicao(indiceDia, "")
+    editarPlanoDietaViewModel.setDetalhesRefeicao(indiceDia, "")
     onClickOk()
 }
