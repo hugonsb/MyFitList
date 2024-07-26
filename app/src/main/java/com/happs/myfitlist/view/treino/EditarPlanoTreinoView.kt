@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CutCornerShape
@@ -33,6 +34,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -59,6 +61,8 @@ import androidx.navigation.NavHostController
 import com.happs.myfitlist.R
 import com.happs.myfitlist.model.treino.Exercicio
 import com.happs.myfitlist.navigation.canGoBack
+import com.happs.myfitlist.room.RepositoryResponse
+import com.happs.myfitlist.state.PlanoTreinoState
 import com.happs.myfitlist.ui.theme.MyBlack
 import com.happs.myfitlist.ui.theme.MyRed
 import com.happs.myfitlist.ui.theme.MyWhite
@@ -69,6 +73,8 @@ import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.util.CustomAlertDialog
 import com.happs.myfitlist.util.CustomTopAppBar
 import com.happs.myfitlist.util.DiasList
+import com.happs.myfitlist.util.ErrorScreen
+import com.happs.myfitlist.util.LoadingScreen
 import com.happs.myfitlist.util.pager.PageIndicator
 import com.happs.myfitlist.viewmodel.treino.EditarPlanoTreinoViewModel
 import kotlinx.coroutines.launch
@@ -82,16 +88,15 @@ fun EditarPlanoTreinoView(
     editarPlanoTreinoViewModel: EditarPlanoTreinoViewModel = koinViewModel<EditarPlanoTreinoViewModel>()
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val uiState by editarPlanoTreinoViewModel.editarPlanoState.collectAsState()
+    val uiState by editarPlanoTreinoViewModel.editarPlanoTreinoState.collectAsState()
 
-    var isNomePlanoTreinoEror by rememberSaveable { mutableStateOf(false) }
+    var isNomePlanoTreinoError by rememberSaveable { mutableStateOf(false) }
 
     var enabledButton by remember { mutableStateOf(true) }
 
     val ctx = LocalContext.current
 
     val pagerState = rememberPagerState(pageCount = { DiasList.dias.size })
-    val scrollState = rememberScrollState()
 
     val localFocusManager = LocalFocusManager.current
 
@@ -107,6 +112,78 @@ fun EditarPlanoTreinoView(
         openDialog.value = true
     }
 
+    when (val state = uiState) {
+        is RepositoryResponse.Loading -> {
+            LoadingScreen()
+        }
+
+        is RepositoryResponse.Success -> {
+            if (openDialog.value) {
+                CustomAlertDialog(
+                    title = stringResource(R.string.deseja_voltar),
+                    text = stringResource(R.string.as_alteracoes_serao_perdidas),
+                    textButtomConfirm = stringResource(R.string.voltar),
+                    onclose = { openDialog.value = false },
+                    onConfirm = {
+                        if (navController.canGoBack) {
+                            navController.popBackStack("treino", false)
+                        }
+                        openDialog.value = false
+                    }
+                )
+            }
+
+            EditarPlanoTreinoContent(
+                editarPlanoTreinoViewModel = editarPlanoTreinoViewModel,
+                pagerState = pagerState,
+                isNomePlanoTreinoError = isNomePlanoTreinoError,
+                enabledButton = enabledButton,
+                openDialog = openDialog,
+                state = state,
+                onNomePlanoChange = { nome ->
+                    if (nome.length <= 100) {
+                        editarPlanoTreinoViewModel.setNomePlanoTreino(nome)
+                        isNomePlanoTreinoError = false
+                    }
+                },
+                onSaveClick = {
+                    coroutineScope.launch {
+                        enabledButton = false
+                        val (success, message) = editarPlanoTreinoViewModel.editarPlanoTreino(
+                            planoTreinoId
+                        )
+                        if (success) {
+                            navController.popBackStack("treino", false)
+                        } else {
+                            enabledButton = true
+                        }
+                        Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            )
+
+        }
+
+        is RepositoryResponse.Error -> {
+            ErrorScreen()
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun EditarPlanoTreinoContent(
+    editarPlanoTreinoViewModel: EditarPlanoTreinoViewModel,
+    pagerState: PagerState,
+    isNomePlanoTreinoError: Boolean,
+    enabledButton: Boolean,
+    openDialog: MutableState<Boolean>,
+    state: RepositoryResponse.Success<PlanoTreinoState>,
+    onNomePlanoChange: (String) -> Unit,
+    onSaveClick: () -> Unit
+) {
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -114,41 +191,20 @@ fun EditarPlanoTreinoView(
             .padding(start = 10.dp, end = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        if (openDialog.value) {
-            CustomAlertDialog(
-                title = stringResource(R.string.deseja_voltar),
-                text = stringResource(R.string.as_alteracoes_serao_perdidas),
-                textButtomConfirm = stringResource(R.string.voltar),
-                onclose = { openDialog.value = false },
-                onConfirm = {
-                    if (navController.canGoBack) {
-                        navController.popBackStack("treino", false)
-                    }
-                    openDialog.value = false
-                }
-            )
-        }
-
         CustomTopAppBar(onBackPressed = {
             openDialog.value = true
         }, barTitle = stringResource(R.string.editar_plano_de_treino))
 
         OutlinedTextField(
-            value = uiState.nomePlanoTreino,
-            onValueChange = {
-                if (it.length <= 100) {
-                    editarPlanoTreinoViewModel.setNomePlanoTreino(it)
-                    isNomePlanoTreinoEror = false
-                }
-            },
+            value = state.data.nomePlanoTreino,
+            onValueChange = onNomePlanoChange,
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Text,
                 capitalization = KeyboardCapitalization.Sentences
             ),
-            isError = isNomePlanoTreinoEror,
-            supportingText = { if (isNomePlanoTreinoEror) Text("Digite um nome para o plano") },
+            isError = isNomePlanoTreinoError,
+            supportingText = { if (isNomePlanoTreinoError) Text("Digite um nome para o plano") },
             placeholder = {
                 Text(
                     text = "Nome do plano",
@@ -194,53 +250,42 @@ fun EditarPlanoTreinoView(
                     verticalAlignment = Alignment.Top,
                     key = { pageIndex -> pageIndex }
                 ) { currentPage ->
-                    CustomCardEditarDiaSemanaa(currentPage, editarPlanoTreinoViewModel)
+                    CustomCardEditarDiaSemanaa(currentPage, editarPlanoTreinoViewModel, state)
                 }
             }
         }
 
-        if (enabledButton) {
-            FilledTonalButton(
-                onClick = {
-                    coroutineScope.launch {
-                        enabledButton = false
-                        val (success, message) = editarPlanoTreinoViewModel.editarPlanoTreino(
-                            planoTreinoId
-                        )
-                        if (success) {
-                            navController.popBackStack("treino", false)
-                        } else {
-                            enabledButton = true
-                        }
-                        Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = MyWhite),
-                shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp)
-                    .height(70.dp)
-                    .align(Alignment.CenterHorizontally),
-            ) {
-                Text(
-                    text = "SALVAR ALTERAÇÕES",
-                    fontFamily = myFontTitle,
-                    fontSize = 25.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
+        FilledTonalButton(
+            enabled = enabledButton,
+            onClick = onSaveClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MyWhite,
+                disabledContainerColor = Color.Gray
+            ),
+            shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)
+                .height(70.dp)
+                .align(Alignment.CenterHorizontally),
+        ) {
+            Text(
+                text = "SALVAR ALTERAÇÕES",
+                fontFamily = myFontTitle,
+                fontSize = 25.sp,
+                color = MaterialTheme.colorScheme.primary,
+            )
         }
+
     }
 }
 
 @Composable
 fun CustomCardEditarDiaSemanaa(
     indiceDia: Int,
-    editarPlanoTreinoViewModel: EditarPlanoTreinoViewModel
+    editarPlanoTreinoViewModel: EditarPlanoTreinoViewModel,
+    state: RepositoryResponse.Success<PlanoTreinoState>
 ) {
-
-    val uiState by editarPlanoTreinoViewModel.editarPlanoState.collectAsState()
 
     var isGrupoMuscularError by rememberSaveable { mutableStateOf(false) }
 
@@ -273,7 +318,7 @@ fun CustomCardEditarDiaSemanaa(
 
             Column {
                 OutlinedTextField(
-                    value = uiState.grupoMuscular[indiceDia],
+                    value = state.data.grupoMuscular[indiceDia],
                     onValueChange = {
                         if (it.length <= 100) {
                             editarPlanoTreinoViewModel.setGrupoMuscular(indiceDia, it)
@@ -306,7 +351,7 @@ fun CustomCardEditarDiaSemanaa(
                     shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp)
                 )
 
-                uiState.exerciciosList[indiceDia].forEach { exercicio ->
+                state.data.exerciciosList[indiceDia].forEach { exercicio ->
                     Card(
                         modifier = Modifier.padding(bottom = 10.dp),
                         shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp)
@@ -355,7 +400,8 @@ fun CustomCardEditarDiaSemanaa(
                             openDialog.value = false
                             enabledButton = true
                         },
-                        editarPlanoTreinoViewModel
+                        editarPlanoTreinoViewModel,
+                        state
                     )
                 }
 
@@ -391,10 +437,9 @@ fun CustomAlertDialogEditarExercicio(
     dia: Int,
     onClickOk: () -> Unit,
     onClickCancelar: () -> Unit,
-    editarPlanoTreinoViewModel: EditarPlanoTreinoViewModel
+    editarPlanoTreinoViewModel: EditarPlanoTreinoViewModel,
+    state: RepositoryResponse.Success<PlanoTreinoState>
 ) {
-    val uiState by editarPlanoTreinoViewModel.editarPlanoState.collectAsState()
-
     var isNomeExercicioError by rememberSaveable { mutableStateOf(false) }
     var isNumeroSeriesError by rememberSaveable { mutableStateOf(false) }
     var isNumeroRepeticoesError by rememberSaveable { mutableStateOf(false) }
@@ -422,7 +467,7 @@ fun CustomAlertDialogEditarExercicio(
                 verticalArrangement = Arrangement.Center
             ) {
                 OutlinedTextField(
-                    value = uiState.nomeExercicio[dia],
+                    value = state.data.nomeExercicio[dia],
                     onValueChange = {
                         if (it.length <= 100) {
                             editarPlanoTreinoViewModel.setNomeExercicio(dia, it)
@@ -458,7 +503,7 @@ fun CustomAlertDialogEditarExercicio(
                 Row {
                     val pattern = remember { Regex("^\\d*\$") }
                     OutlinedTextField(
-                        value = uiState.numeroSeries[dia],
+                        value = state.data.numeroSeries[dia],
                         onValueChange = {
                             if (it.matches(pattern)) {
                                 if (it.isNotEmpty()) {
@@ -498,7 +543,7 @@ fun CustomAlertDialogEditarExercicio(
                     Spacer(modifier = Modifier.width(10.dp))
 
                     OutlinedTextField(
-                        value = uiState.numeroRepeticoes[dia],
+                        value = state.data.numeroRepeticoes[dia],
                         onValueChange = {
                             if (it.matches(pattern)) {
                                 if (it.isNotEmpty()) {
@@ -541,9 +586,9 @@ fun CustomAlertDialogEditarExercicio(
 
                 OutlinedButton(
                     onClick = {
-                        val nomeExercicio = uiState.nomeExercicio[dia]
-                        val numeroSeries = uiState.numeroSeries[dia]
-                        val numeroRepeticoes = uiState.numeroRepeticoes[dia]
+                        val nomeExercicio = state.data.nomeExercicio[dia]
+                        val numeroSeries = state.data.numeroSeries[dia]
+                        val numeroRepeticoes = state.data.numeroRepeticoes[dia]
 
                         if (nomeExercicio.isNotEmpty() && numeroSeries.isNotEmpty() && numeroRepeticoes.isNotEmpty()) {
 

@@ -16,5 +16,4 @@ data class DietaState(
     val planoDietaPrincipal: PlanoDieta = PlanoDieta(nome = "", idUsuario = -1),
     val listaPlanosDieta: List<PlanoDieta> = emptyList(),
     val diasComRefeicoes: Array<Pair<DiaDieta, List<Refeicao>>> = emptyArray(),
-    val isLoaded: Boolean = false
 )

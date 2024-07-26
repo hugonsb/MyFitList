@@ -199,36 +199,39 @@ fun CriarPlanoTreinoView(
             }
         }
 
-        if (enabledButton) {
-            FilledTonalButton(
-                onClick = {
-                    coroutineScope.launch {
-                        enabledButton = false
-                        val (success, message) = criarPlanoDietaViewModel.savePlanoTreino()
-                        if (success) {
-                            navController.popBackStack("treino", false)
-                        } else {
-                            enabledButton = true
-                        }
-                        Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
+        FilledTonalButton(
+            enabled = enabledButton,
+            onClick = {
+                coroutineScope.launch {
+                    enabledButton = false
+                    val (success, message) = criarPlanoDietaViewModel.savePlanoTreino()
+                    if (success) {
+                        navController.popBackStack("treino", false)
+                    } else {
+                        enabledButton = true
                     }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = MyWhite),
-                shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp)
-                    .height(70.dp)
-                    .align(Alignment.CenterHorizontally),
-            ) {
-                Text(
-                    text = stringResource(R.string.salvar_plano),
-                    fontFamily = myFontTitle,
-                    fontSize = 25.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
+                    Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
+                }
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MyWhite,
+                disabledContainerColor = Color.Gray
+            ),
+            shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)
+                .height(70.dp)
+                .align(Alignment.CenterHorizontally),
+        ) {
+            Text(
+                text = stringResource(R.string.salvar_plano),
+                fontFamily = myFontTitle,
+                fontSize = 25.sp,
+                color = MaterialTheme.colorScheme.primary,
+            )
         }
+
     }
 }
 
@@ -237,8 +240,6 @@ fun CustomCardCadastroDiaSemanaTreino(
     indiceDia: Int,
     criarPlanoTreinoViewModel: CriarPlanoTreinoViewModel
 ) {
-
-    //LocalFocusManager.current.clearFocus()
 
     val uiState by criarPlanoTreinoViewModel.criarPlanoTreinoState.collectAsState()
 

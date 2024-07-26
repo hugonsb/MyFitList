@@ -86,7 +86,7 @@ class TreinoViewModel(
             }
         } catch (e: Exception) {
             _treinoState.value =
-                RepositoryResponse.Error("Erro: ${e.message}")
+                RepositoryResponse.Error("Erro treinoState: ${e.message}")
         }
     }
 

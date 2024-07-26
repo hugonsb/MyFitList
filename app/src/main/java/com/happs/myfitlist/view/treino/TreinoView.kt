@@ -69,6 +69,7 @@ import com.happs.myfitlist.model.treino.Exercicio
 import com.happs.myfitlist.model.treino.PlanoTreino
 import com.happs.myfitlist.model.usuario.Usuario
 import com.happs.myfitlist.room.RepositoryResponse
+import com.happs.myfitlist.state.TreinoState
 import com.happs.myfitlist.ui.theme.MyBlack
 import com.happs.myfitlist.ui.theme.MyRed
 import com.happs.myfitlist.ui.theme.MyWhite
@@ -127,83 +128,87 @@ fun TreinoView(
 
     val uiState by treinoViewModel.treinoState.collectAsState()
 
-    var expandedPlanoTreinoList by remember { mutableStateOf(false) }
-
-    val listPlanoTreinoState = rememberLazyListState()
-
     when (val state = uiState) {
         is RepositoryResponse.Loading -> {
             LoadingScreen()
         }
 
         is RepositoryResponse.Success -> {
-            val usuario = state.data.usuario
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(MaterialTheme.colorScheme.primary)
-                    .padding(start = 10.dp, end = 10.dp, top = 5.dp),
-            ) {
-
-                Header(usuario = state.data.usuario)
-
-                Spacer(modifier = Modifier.height(15.dp))
-
-                Column(
-                    modifier = Modifier.animateContentSize(
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioNoBouncy,
-                            stiffness = Spring.StiffnessLow
-                        )
-                    )
-                ) {
-
-                    if (expandedPlanoTreinoList && state.data.listaPlanosTreino.isNotEmpty()) {
-                        PlanosTreinoList(
-                            listPlanoTreino = state.data.listaPlanosTreino,
-                            planoTreinoPrincipal = state.data.planoTreinoPrincipal,
-                            listPlanoTreinoState = listPlanoTreinoState,
-                            usuario = usuario,
-                            treinoViewModel = treinoViewModel,
-                            selecionarPlano = { expandedPlanoTreinoList = false }
-                        )
-                    } else if (usuario.idPlanoTreinoPrincipal != -1) {
-                        PlanoTreinoPrincipal(
-                            planoTreinoPrincipal = state.data.planoTreinoPrincipal,
-                            usuario = usuario,
-                            navController = navController,
-                            clickPlano = { expandedPlanoTreinoList = true }
-                        )
-                    }
-                }
-
-                Box {
-
-                    DiasTreinoList(listDiaTreino = state.data.diasComExercicios)
-
-                    FloatingActionButton(modifier = Modifier
-                        .padding(bottom = 10.dp)
-                        .size(55.dp)
-                        .align(Alignment.BottomEnd),
-                        containerColor = MaterialTheme.colorScheme.onSecondary,
-                        contentColor = MyWhite,
-                        elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 3.dp),
-                        shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp),
-                        onClick = {
-                            navController.navigate("criar_plano_treino") { launchSingleTop = true }
-                        }) {
-                        Icon(
-                            imageVector = Icons.Default.Add,
-                            contentDescription = null,
-                            modifier = Modifier.size(30.dp)
-                        )
-                    }
-                }
-            }
+            TreinoViewContent(state, treinoViewModel, navController)
         }
 
         is RepositoryResponse.Error -> {
             ErrorScreen()
+        }
+    }
+}
+
+@Composable
+fun TreinoViewContent(
+    state: RepositoryResponse.Success<TreinoState>,
+    treinoViewModel: TreinoViewModel,
+    navController: NavHostController
+) {
+    var expandedPlanoTreinoList by remember { mutableStateOf(false) }
+    val listPlanoTreinoState = rememberLazyListState()
+    val usuario = state.data.usuario
+    val uiState = state.data
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary)
+            .padding(start = 10.dp, end = 10.dp, top = 5.dp),
+    ) {
+        Header(usuario = usuario)
+        Spacer(modifier = Modifier.height(15.dp))
+        Column(
+            modifier = Modifier.animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            )
+        ) {
+            if (expandedPlanoTreinoList && uiState.listaPlanosTreino.isNotEmpty()) {
+                PlanosTreinoList(
+                    listPlanoTreino = uiState.listaPlanosTreino,
+                    planoTreinoPrincipal = uiState.planoTreinoPrincipal,
+                    listPlanoTreinoState = listPlanoTreinoState,
+                    usuario = usuario,
+                    treinoViewModel = treinoViewModel,
+                    selecionarPlano = { expandedPlanoTreinoList = false }
+                )
+            } else if (usuario.idPlanoTreinoPrincipal != -1) {
+                PlanoTreinoPrincipal(
+                    planoTreinoPrincipal = uiState.planoTreinoPrincipal,
+                    usuario = usuario,
+                    navController = navController,
+                    clickPlano = { expandedPlanoTreinoList = true }
+                )
+            }
+        }
+
+        Box {
+
+            DiasTreinoList(listDiaTreino = uiState.diasComExercicios)
+
+            FloatingActionButton(modifier = Modifier
+                .padding(bottom = 10.dp)
+                .size(55.dp)
+                .align(Alignment.BottomEnd),
+                containerColor = MaterialTheme.colorScheme.onSecondary,
+                contentColor = MyWhite,
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 3.dp),
+                shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp),
+                onClick = {
+                    navController.navigate("criar_plano_treino") { launchSingleTop = true }
+                }) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(30.dp)
+                )
+            }
         }
     }
 }

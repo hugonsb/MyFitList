@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
@@ -61,6 +60,8 @@ import com.happs.myfitlist.model.dieta.DiaDieta
 import com.happs.myfitlist.model.dieta.PlanoDieta
 import com.happs.myfitlist.model.dieta.Refeicao
 import com.happs.myfitlist.model.usuario.Usuario
+import com.happs.myfitlist.room.RepositoryResponse
+import com.happs.myfitlist.state.DietaState
 import com.happs.myfitlist.ui.theme.MyBlack
 import com.happs.myfitlist.ui.theme.MyRed
 import com.happs.myfitlist.ui.theme.MyWhite
@@ -69,6 +70,8 @@ import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.util.CustomAlertDialog
 import com.happs.myfitlist.util.DiasList
+import com.happs.myfitlist.util.ErrorScreen
+import com.happs.myfitlist.util.LoadingScreen
 import com.happs.myfitlist.util.func.getCurrentDayOfWeekIndex
 import com.happs.myfitlist.util.pager.PageIndicator
 import com.happs.myfitlist.viewmodel.dieta.DietaViewModel
@@ -81,86 +84,93 @@ fun DietaView(
 ) {
     val uiState by dietaViewModel.dietaState.collectAsState()
 
-    var expandedPlanoDietaList by remember { mutableStateOf(false) }
-
-    val listPlanoDietaState = rememberLazyListState()
-
-    val usuario = uiState.usuario
-
-    if (!uiState.isLoaded) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primary),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            CircularProgressIndicator(
-                color = MyWhite
-            )
+    when (val state = uiState) {
+        is RepositoryResponse.Loading -> {
+            LoadingScreen()
         }
-    } else {
+
+        is RepositoryResponse.Success -> {
+            DietaViewContent(state, dietaViewModel, navController)
+        }
+
+        is RepositoryResponse.Error -> {
+            ErrorScreen()
+        }
+    }
+
+}
+
+@Composable
+fun DietaViewContent(
+    state: RepositoryResponse.Success<DietaState>,
+    dietaViewModel: DietaViewModel,
+    navController: NavHostController
+) {
+    var expandedPlanoDietaList by remember { mutableStateOf(false) }
+    val listPlanoDietaState = rememberLazyListState()
+    val usuario = state.data.usuario
+    val uiState = state.data
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colorScheme.primary)
+            .padding(start = 10.dp, end = 10.dp, top = 5.dp),
+    ) {
+
+        Header(usuario = usuario)
+
+        Spacer(modifier = Modifier.height(15.dp))
+
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(MaterialTheme.colorScheme.primary)
-                .padding(start = 10.dp, end = 10.dp, top = 5.dp),
+            modifier = Modifier.animateContentSize(
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            )
         ) {
 
-            Header(usuario = uiState.usuario)
-
-            Spacer(modifier = Modifier.height(15.dp))
-
-            Column(
-                modifier = Modifier.animateContentSize(
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioNoBouncy,
-                        stiffness = Spring.StiffnessLow
-                    )
+            if (expandedPlanoDietaList && uiState.listaPlanosDieta.isNotEmpty()) {
+                PlanosDietaList(
+                    listPlanoDieta = uiState.listaPlanosDieta,
+                    planoDietaPrincipal = uiState.planoDietaPrincipal,
+                    listPlanoDietaState = listPlanoDietaState,
+                    usuario = usuario,
+                    dietaViewModel = dietaViewModel,
+                    selecionarPlano = { expandedPlanoDietaList = false }
                 )
-            ) {
+            } else if (usuario.idPlanoDietaPrincipal != -1) {
 
-                if (expandedPlanoDietaList && uiState.listaPlanosDieta.isNotEmpty()) {
-                    PlanosDietaList(
-                        listPlanoDieta = uiState.listaPlanosDieta,
-                        planoDietaPrincipal = uiState.planoDietaPrincipal,
-                        listPlanoDietaState = listPlanoDietaState,
-                        usuario = usuario,
-                        dietaViewModel = dietaViewModel,
-                        selecionarPlano = { expandedPlanoDietaList = false }
-                    )
-                } else if (usuario.idPlanoDietaPrincipal != -1) {
-
-                    PlanoDietaPrincipal(
-                        planoDietaPrincipal = uiState.planoDietaPrincipal,
-                        usuario = usuario,
-                        navController = navController,
-                        clickPlano = { expandedPlanoDietaList = true }
-                    )
-                }
+                PlanoDietaPrincipal(
+                    planoDietaPrincipal = uiState.planoDietaPrincipal,
+                    usuario = usuario,
+                    navController = navController,
+                    clickPlano = { expandedPlanoDietaList = true }
+                )
             }
+        }
 
-            Box {
+        Box {
 
-                DiasRefeicaoList(listDiaDieta = uiState.diasComRefeicoes)
+            DiasRefeicaoList(listDiaDieta = uiState.diasComRefeicoes)
 
-                FloatingActionButton(modifier = Modifier
-                    .padding(bottom = 10.dp)
-                    .size(55.dp)
-                    .align(Alignment.BottomEnd),
-                    containerColor = MaterialTheme.colorScheme.onSecondary,
-                    contentColor = MyWhite,
-                    elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 3.dp),
-                    shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp),
-                    onClick = {
-                        navController.navigate("criar_plano_alimentar") { launchSingleTop = true }
-                    }) {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = null,
-                        modifier = Modifier.size(30.dp)
-                    )
-                }
+            FloatingActionButton(modifier = Modifier
+                .padding(bottom = 10.dp)
+                .size(55.dp)
+                .align(Alignment.BottomEnd),
+                containerColor = MaterialTheme.colorScheme.onSecondary,
+                contentColor = MyWhite,
+                elevation = FloatingActionButtonDefaults.elevation(defaultElevation = 3.dp),
+                shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp),
+                onClick = {
+                    navController.navigate("criar_plano_alimentar") { launchSingleTop = true }
+                }) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null,
+                    modifier = Modifier.size(30.dp)
+                )
             }
         }
     }

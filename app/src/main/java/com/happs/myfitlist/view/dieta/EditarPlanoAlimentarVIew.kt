@@ -3,7 +3,6 @@ package com.happs.myfitlist.view.dieta
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -100,7 +99,6 @@ fun EditarPlanoAlimentarVIew(
     val ctx = LocalContext.current
 
     val pagerState = rememberPagerState(pageCount = { DiasList.dias.size })
-    val scrollState = rememberScrollState()
 
     val localFocusManager = LocalFocusManager.current
 
@@ -141,7 +139,6 @@ fun EditarPlanoAlimentarVIew(
             EditarPlanoAlimentarContent(
                 editarPlanoDietaViewModel = editarPlanoDietaViewModel,
                 pagerState = pagerState,
-                scrollState = scrollState,
                 isNomePlanoDietaError = isNomePlanoDietaError,
                 enabledButton = enabledButton,
                 openDialog = openDialog,
@@ -181,14 +178,16 @@ fun EditarPlanoAlimentarVIew(
 fun EditarPlanoAlimentarContent(
     editarPlanoDietaViewModel: EditarPlanoAlimentarViewModel,
     pagerState: PagerState,
-    scrollState: ScrollState,
     isNomePlanoDietaError: Boolean,
     enabledButton: Boolean,
     openDialog: MutableState<Boolean>,
-    state: RepositoryResponse.Success<PlanoAlimentarState>, // Substitua DataType pelo tipo real do seu dado
+    state: RepositoryResponse.Success<PlanoAlimentarState>,
     onNomePlanoChange: (String) -> Unit,
     onSaveClick: () -> Unit
 ) {
+
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()

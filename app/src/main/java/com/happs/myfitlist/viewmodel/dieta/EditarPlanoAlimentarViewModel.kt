@@ -31,9 +31,7 @@ class EditarPlanoAlimentarViewModel(
 
     init {
         viewModelScope.launch {
-
             _editarPlanoAlimentarState.value = RepositoryResponse.Loading
-
             try {
                 val planoDieta = treinoRepository.getPlanoDieta(planoDietaId).first()
                 val diasDieta = treinoRepository.getDiasDieta(planoDietaId).first()
@@ -51,7 +49,8 @@ class EditarPlanoAlimentarViewModel(
                     )
                 }
             } catch (e: Exception) {
-                _editarPlanoAlimentarState.value = RepositoryResponse.Error("Erro: ${e.message}")
+                _editarPlanoAlimentarState.value =
+                    RepositoryResponse.Error("Erro editarPlanoAlimentarState: ${e.message}")
             }
         }
     }
@@ -122,7 +121,6 @@ class EditarPlanoAlimentarViewModel(
 
     fun removerRefeicao(dia: Int, refeicao: Refeicao) {
         _editarPlanoAlimentarState.update { currentState ->
-
             when (currentState) {
                 is RepositoryResponse.Success -> {
                     val updatedRefeicaoList =

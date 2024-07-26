@@ -201,43 +201,47 @@ fun CriarPlanoAlimentarView(
             }
         }
 
-        if (enabledButton) {
-            FilledTonalButton(
-                onClick = {
-                    coroutineScope.launch {
-                        enabledButton = false
-                        val (success, message) = criarPlanoDietaViewModel.savePlanoAlimentar()
-                        if (success) {
-                            navController.popBackStack("dieta", false)
-                        } else {
-                            enabledButton = true
-                        }
-                        Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
+
+        FilledTonalButton(
+            enabled = enabledButton,
+            onClick = {
+                coroutineScope.launch {
+                    enabledButton = false
+                    val (success, message) = criarPlanoDietaViewModel.savePlanoAlimentar()
+                    if (success) {
+                        navController.popBackStack("dieta", false)
+                    } else {
+                        enabledButton = true
                     }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = MyWhite),
-                shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp)
-                    .height(70.dp)
-                    .align(Alignment.CenterHorizontally),
-            ) {
-                Text(
-                    text = stringResource(R.string.salvar_plano),
-                    fontFamily = myFontTitle,
-                    fontSize = 25.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
+                    Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
+                }
+            },
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MyWhite,
+                disabledContainerColor = Color.Gray
+            ),
+            shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)
+                .height(70.dp)
+                .align(Alignment.CenterHorizontally),
+        ) {
+            Text(
+                text = stringResource(R.string.salvar_plano),
+                fontFamily = myFontTitle,
+                fontSize = 25.sp,
+                color = MaterialTheme.colorScheme.primary,
+            )
         }
+
     }
 }
 
 @Composable
 fun CustomCardCadastroDiaSemanaDieta(
     indiceDia: Int,
-    criarPlanoAlimentarViewModel : CriarPlanoAlimentarViewModel
+    criarPlanoAlimentarViewModel: CriarPlanoAlimentarViewModel
 ) {
 
     val uiState by criarPlanoAlimentarViewModel.criarPlanoAlimentarState.collectAsState()
@@ -301,7 +305,10 @@ fun CustomCardCadastroDiaSemanaDieta(
                         Icon(
                             modifier = Modifier
                                 .clickable {
-                                    criarPlanoAlimentarViewModel.removerRefeicao(indiceDia, refeicao)
+                                    criarPlanoAlimentarViewModel.removerRefeicao(
+                                        indiceDia,
+                                        refeicao
+                                    )
                                 },
                             tint = MyWhite,
                             painter = painterResource(id = R.drawable.baseline_close_24),
@@ -323,7 +330,8 @@ fun CustomCardCadastroDiaSemanaDieta(
                         openDialog.value = false
                         enabledButton = true
                     },
-                    criarPlanoAlimentarViewModel)
+                    criarPlanoAlimentarViewModel
+                )
             }
 
             OutlinedButton(
@@ -359,7 +367,7 @@ fun CustomAlertDialogCadastroRefeicao(
     dia: Int,
     onClickOk: () -> Unit,
     onClickCancelar: () -> Unit,
-    criarPlanoAlimentarViewModel : CriarPlanoAlimentarViewModel
+    criarPlanoAlimentarViewModel: CriarPlanoAlimentarViewModel
 ) {
     val uiState by criarPlanoAlimentarViewModel.criarPlanoAlimentarState.collectAsState()
 
@@ -557,7 +565,7 @@ fun adicionarRefeicao(
     tipo: String,
     detalhes: String,
     onClickOk: () -> Unit,
-    criarPlanoAlimentarViewModel : CriarPlanoAlimentarViewModel
+    criarPlanoAlimentarViewModel: CriarPlanoAlimentarViewModel
 ) {
     criarPlanoAlimentarViewModel.adicionarRefeicao(
         indiceDia,
