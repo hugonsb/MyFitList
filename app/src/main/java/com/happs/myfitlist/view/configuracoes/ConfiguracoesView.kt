@@ -116,9 +116,7 @@ fun Menu(
                 }
                 openDialog.value = false
 
-
                 navControllerCadastro.navigate("cadastro") {
-
                     // // evitar abrir novamente a mesma tela ao reselecionar mesmo item
                     launchSingleTop = true
                     // restaura o estado ao voltar para a tela anterior

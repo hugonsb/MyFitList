@@ -40,11 +40,15 @@ import androidx.navigation.NavController
 import com.happs.myfitlist.R
 import com.happs.myfitlist.model.usuario.Usuario
 import com.happs.myfitlist.navigation.canGoBack
+import com.happs.myfitlist.room.RepositoryResponse
+import com.happs.myfitlist.state.EditarDadosPessoaisState
 import com.happs.myfitlist.ui.theme.TextFieldColors.colorsTextFieldsCadastro
 import com.happs.myfitlist.ui.theme.myFontBody
 import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.util.CustomAlertDialog
 import com.happs.myfitlist.util.CustomTopAppBar
+import com.happs.myfitlist.util.ErrorScreen
+import com.happs.myfitlist.util.LoadingScreen
 import com.happs.myfitlist.viewmodel.configuracoes.EditarDadosPessoaisViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
@@ -55,54 +59,71 @@ fun EditarDadosPessoaisView(
     editarDadosPessoaisViewModel: EditarDadosPessoaisViewModel = koinViewModel<EditarDadosPessoaisViewModel>()
 ) {
 
+    val uiState by editarDadosPessoaisViewModel.editarDadosPessoaisState.collectAsState()
+
     val openDialog = remember { mutableStateOf(false) }
 
-    if (openDialog.value) {
-        CustomAlertDialog(
-            title = stringResource(R.string.deseja_voltar),
-            text = stringResource(R.string.as_alteracoes_serao_perdidas),
-            textButtomConfirm = stringResource(R.string.voltar),
-            onclose = { openDialog.value = false },
-            onConfirm = {
-                if (navControllerConfiguracoes.canGoBack) {
-                    navControllerConfiguracoes.popBackStack("configuracoes", false)
-                }
-                openDialog.value = false
+    when (val state = uiState) {
+        is RepositoryResponse.Loading -> {
+            LoadingScreen()
+        }
+
+        is RepositoryResponse.Success -> {
+            if (openDialog.value) {
+                CustomAlertDialog(
+                    title = stringResource(R.string.deseja_voltar),
+                    text = stringResource(R.string.as_alteracoes_serao_perdidas),
+                    textButtomConfirm = stringResource(R.string.voltar),
+                    onclose = { openDialog.value = false },
+                    onConfirm = {
+                        if (navControllerConfiguracoes.canGoBack) {
+                            navControllerConfiguracoes.popBackStack("configuracoes", false)
+                        }
+                        openDialog.value = false
+                    }
+                )
             }
-        )
-    }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(MaterialTheme.colorScheme.primary)
+            ) {
+                CustomTopAppBar(
+                    onBackPressed = { openDialog.value = true },
+                    barTitle = stringResource(R.string.alterar_dados_pessoais)
+                )
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.primary)
-    ) {
-        CustomTopAppBar(
-            onBackPressed = { openDialog.value = true },
-            barTitle = stringResource(R.string.alterar_dados_pessoais)
-        )
+                Content(editarDadosPessoaisViewModel, state, navControllerConfiguracoes)
+            }
+        }
 
-        Content(editarDadosPessoaisViewModel, navControllerConfiguracoes)
+        is RepositoryResponse.Error -> {
+            ErrorScreen()
+        }
     }
 }
 
 @Composable
-fun Content(viewModel: EditarDadosPessoaisViewModel, navControllerConfiguracoes: NavController) {
+fun Content(
+    viewModel: EditarDadosPessoaisViewModel,
+    state: RepositoryResponse.Success<EditarDadosPessoaisState>,
+    navControllerConfiguracoes: NavController
+) {
 
     val ctx = LocalContext.current
 
-    val uiState by viewModel.editarDadosPessoaisState.collectAsState()
+    val usuario = state.data.usuario
 
     var nome by rememberSaveable { mutableStateOf("") }
     var idade by rememberSaveable { mutableStateOf("") }
     var peso by rememberSaveable { mutableStateOf("") }
 
-    LaunchedEffect(uiState) {
-        nome = uiState.usuario.nome
+    LaunchedEffect(state.data) {
+        nome = usuario.nome
         idade =
-            if (uiState.usuario.idade.toString() == "-1") "" else uiState.usuario.idade.toString()
+            if (usuario.idade.toString() == "-1") "" else usuario.idade.toString()
         peso =
-            if (uiState.usuario.peso.toString() == "-1.0") "" else uiState.usuario.peso.toString()
+            if (usuario.peso.toString() == "-1.0") "" else usuario.peso.toString()
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -237,17 +258,17 @@ fun Content(viewModel: EditarDadosPessoaisViewModel, navControllerConfiguracoes:
             onClick = {
                 if (nome.isNotBlank()) {
                     enabledButton = false
-                    val usuario =
+                    val newUsuario =
                         Usuario(
-                            id = uiState.usuario.id,
+                            id = usuario.id,
                             nome = nome,
                             idade = idade.toByteOrNull() ?: -1,
                             peso = peso.toFloatOrNull() ?: -1f,
-                            idPlanoTreinoPrincipal = uiState.usuario.idPlanoTreinoPrincipal,
-                            idPlanoDietaPrincipal = uiState.usuario.idPlanoDietaPrincipal
+                            idPlanoTreinoPrincipal = usuario.idPlanoTreinoPrincipal,
+                            idPlanoDietaPrincipal = usuario.idPlanoDietaPrincipal
                         )
                     coroutineScope.launch {
-                        viewModel.updateUser(usuario)
+                        viewModel.updateUser(newUsuario)
                     }
                     Toast.makeText(ctx, "Dados alterados com sucesso.", Toast.LENGTH_SHORT).show()
                     navControllerConfiguracoes.popBackStack("configuracoes", false)
