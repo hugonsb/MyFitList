@@ -32,6 +32,7 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +40,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -90,6 +92,14 @@ fun CriarPlanoTreinoView(
 
     val pagerState = rememberPagerState(pageCount = { DiasList.dias.size })
     val scrollState = rememberScrollState()
+
+    val localFocusManager = LocalFocusManager.current
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { _ ->
+            localFocusManager.clearFocus()
+        }
+    }
 
     val openDialog = remember { mutableStateOf(false) }
 
@@ -179,7 +189,7 @@ fun CriarPlanoTreinoView(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState),
-                    beyondBoundsPageCount = 7,
+                    beyondBoundsPageCount = 2,
                     state = pagerState,
                     verticalAlignment = Alignment.Top,
                     key = { pageIndex -> pageIndex }
@@ -228,7 +238,7 @@ fun CustomCardCadastroDiaSemanaTreino(
     criarPlanoTreinoViewModel: CriarPlanoTreinoViewModel
 ) {
 
-    LocalFocusManager.current.clearFocus()
+    //LocalFocusManager.current.clearFocus()
 
     val uiState by criarPlanoTreinoViewModel.criarPlanoTreinoState.collectAsState()
 
@@ -391,6 +401,7 @@ fun CustomAlertDialogCadastroExercicio(
     var isNumeroRepeticoesError by rememberSaveable { mutableStateOf(false) }
 
     AlertDialog(
+        shape = CutCornerShape(topStart = 24.dp, bottomEnd = 24.dp),
         containerColor = Color.White,
         onDismissRequest = {
             onClickCancelar()

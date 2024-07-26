@@ -6,7 +6,7 @@ import com.happs.myfitlist.model.dieta.DiaDieta
 import com.happs.myfitlist.model.dieta.PlanoDieta
 import com.happs.myfitlist.model.dieta.Refeicao
 import com.happs.myfitlist.room.TreinoRepository
-import com.happs.myfitlist.state.PlanoDietaState
+import com.happs.myfitlist.state.PlanoAlimentarState
 import com.happs.myfitlist.util.DiasList
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,21 +14,21 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.update
 
-class CriarPlanoDietaViewModel(
+class CriarPlanoAlimentarViewModel(
     private val treinoRepository: TreinoRepository
 ) : ViewModel() {
 
-    private val _criarPlanoDietaState = MutableStateFlow(PlanoDietaState())
-    val criarPlanoDietaState: StateFlow<PlanoDietaState> = _criarPlanoDietaState.asStateFlow()
+    private val _criarPlanoAlimentarState = MutableStateFlow(PlanoAlimentarState())
+    val criarPlanoAlimentarState: StateFlow<PlanoAlimentarState> = _criarPlanoAlimentarState.asStateFlow()
 
-    fun setNomePlanoDieta(nome: String) {
-        _criarPlanoDietaState.update { currentState ->
-            currentState.copy(nomePlanoDieta = nome)
+    fun setNomePlanoAlimentar(nome: String) {
+        _criarPlanoAlimentarState.update { currentState ->
+            currentState.copy(nomePlanoAlimentar = nome)
         }
     }
 
     fun setTipoRefeicao(dia: Int, tipo: String) {
-        _criarPlanoDietaState.update { currentState ->
+        _criarPlanoAlimentarState.update { currentState ->
             val updatedList = currentState.tipoRefeicao.toMutableList().apply {
                 this[dia] = tipo
             }
@@ -37,7 +37,7 @@ class CriarPlanoDietaViewModel(
     }
 
     fun setDetalhesRefeicao(dia: Int, detalhes: String) {
-        _criarPlanoDietaState.update { currentState ->
+        _criarPlanoAlimentarState.update { currentState ->
             val updatedList = currentState.detalhesRefeicao.toMutableList().apply {
                 this[dia] = detalhes
             }
@@ -46,14 +46,14 @@ class CriarPlanoDietaViewModel(
     }
 
     fun adicionarRefeicao(dia: Int, refeicao: Refeicao) {
-        _criarPlanoDietaState.update { currentState ->
+        _criarPlanoAlimentarState.update { currentState ->
             currentState.refeicoesList[dia].add(refeicao)
             currentState
         }
     }
 
     fun removerRefeicao(dia: Int, refeicao: Refeicao) {
-        _criarPlanoDietaState.update { currentState ->
+        _criarPlanoAlimentarState.update { currentState ->
             val updatedRefeicaoList = currentState.refeicoesList.toMutableList().apply {
                 val diaRefeicoes = this[dia].toMutableList()
                 diaRefeicoes.remove(refeicao)
@@ -63,18 +63,18 @@ class CriarPlanoDietaViewModel(
         }
     }
 
-    suspend fun savePlanoDieta(): Pair<Boolean, String> {
+    suspend fun savePlanoAlimentar(): Pair<Boolean, String> {
 
         return try {
             val usuarioId = treinoRepository.getUsuario().first().id
 
-            val state = _criarPlanoDietaState.value
+            val state = _criarPlanoAlimentarState.value
             val planoDieta = PlanoDieta(
-                nome = state.nomePlanoDieta,
+                nome = state.nomePlanoAlimentar,
                 idUsuario = usuarioId
             )
 
-            if (state.nomePlanoDieta.isEmpty()) {
+            if (state.nomePlanoAlimentar.isEmpty()) {
                 throw Exception("Nome do plano não pode ser vazio")
             }
 
@@ -100,7 +100,7 @@ class CriarPlanoDietaViewModel(
 
             Pair(true, "Salvo com sucesso") // Retorna sucesso com mensagem
         } catch (e: Exception) {
-            Log.e("CriarPlanoDieta", "Erro: ${e.message}")
+            Log.e("CriarPlanoAlimentar", "Erro: ${e.message}")
             Pair(false, e.message.toString()) // Retorna erro com mensagem
         }
     }

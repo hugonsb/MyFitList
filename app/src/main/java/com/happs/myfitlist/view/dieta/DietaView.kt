@@ -77,9 +77,9 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun DietaView(
     navController: NavHostController,
-    criarPlanoDietaViewModel: DietaViewModel = koinViewModel<DietaViewModel>()
+    dietaViewModel: DietaViewModel = koinViewModel<DietaViewModel>()
 ) {
-    val uiState by criarPlanoDietaViewModel.dietaState.collectAsState()
+    val uiState by dietaViewModel.dietaState.collectAsState()
 
     var expandedPlanoDietaList by remember { mutableStateOf(false) }
 
@@ -126,7 +126,7 @@ fun DietaView(
                         planoDietaPrincipal = uiState.planoDietaPrincipal,
                         listPlanoDietaState = listPlanoDietaState,
                         usuario = usuario,
-                        dietaViewModel = criarPlanoDietaViewModel,
+                        dietaViewModel = dietaViewModel,
                         selecionarPlano = { expandedPlanoDietaList = false }
                     )
                 } else if (usuario.idPlanoDietaPrincipal != -1) {

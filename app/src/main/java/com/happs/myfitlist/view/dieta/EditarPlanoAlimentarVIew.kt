@@ -3,6 +3,7 @@ package com.happs.myfitlist.view.dieta
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CutCornerShape
@@ -34,6 +36,8 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -41,6 +45,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -59,6 +64,8 @@ import androidx.navigation.NavHostController
 import com.happs.myfitlist.R
 import com.happs.myfitlist.model.dieta.Refeicao
 import com.happs.myfitlist.navigation.canGoBack
+import com.happs.myfitlist.room.RepositoryResponse
+import com.happs.myfitlist.state.PlanoAlimentarState
 import com.happs.myfitlist.ui.theme.MyBlack
 import com.happs.myfitlist.ui.theme.MyRed
 import com.happs.myfitlist.ui.theme.MyWhite
@@ -69,8 +76,10 @@ import com.happs.myfitlist.ui.theme.myFontTitle
 import com.happs.myfitlist.util.CustomAlertDialog
 import com.happs.myfitlist.util.CustomTopAppBar
 import com.happs.myfitlist.util.DiasList
+import com.happs.myfitlist.util.ErrorScreen
+import com.happs.myfitlist.util.LoadingScreen
 import com.happs.myfitlist.util.pager.PageIndicator
-import com.happs.myfitlist.viewmodel.dieta.EditarPlanoDietaViewModel
+import com.happs.myfitlist.viewmodel.dieta.EditarPlanoAlimentarViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -79,10 +88,10 @@ import org.koin.androidx.compose.koinViewModel
 fun EditarPlanoAlimentarVIew(
     navController: NavHostController,
     planoAlimentarId: Int,
-    criarPlanoDietaViewModel: EditarPlanoDietaViewModel = koinViewModel<EditarPlanoDietaViewModel>()
+    editarPlanoDietaViewModel: EditarPlanoAlimentarViewModel = koinViewModel<EditarPlanoAlimentarViewModel>()
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val uiState by criarPlanoDietaViewModel.editarPlanoDietaState.collectAsState()
+    val uiState by editarPlanoDietaViewModel.editarPlanoAlimentarState.collectAsState()
 
     var isNomePlanoDietaError by rememberSaveable { mutableStateOf(false) }
 
@@ -93,12 +102,93 @@ fun EditarPlanoAlimentarVIew(
     val pagerState = rememberPagerState(pageCount = { DiasList.dias.size })
     val scrollState = rememberScrollState()
 
+    val localFocusManager = LocalFocusManager.current
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { _ ->
+            localFocusManager.clearFocus()
+        }
+    }
+
     val openDialog = remember { mutableStateOf(false) }
 
     BackHandler {
         openDialog.value = true
     }
 
+    when (val state = uiState) {
+        is RepositoryResponse.Loading -> {
+            LoadingScreen()
+        }
+
+        is RepositoryResponse.Success -> {
+
+            if (openDialog.value) {
+                CustomAlertDialog(
+                    title = stringResource(R.string.deseja_voltar),
+                    text = stringResource(R.string.as_alteracoes_serao_perdidas),
+                    textButtomConfirm = stringResource(R.string.voltar),
+                    onclose = { openDialog.value = false },
+                    onConfirm = {
+                        if (navController.canGoBack) {
+                            navController.popBackStack("dieta", false)
+                        }
+                        openDialog.value = false
+                    }
+                )
+            }
+
+            EditarPlanoAlimentarContent(
+                editarPlanoDietaViewModel = editarPlanoDietaViewModel,
+                pagerState = pagerState,
+                scrollState = scrollState,
+                isNomePlanoDietaError = isNomePlanoDietaError,
+                enabledButton = enabledButton,
+                openDialog = openDialog,
+                state = state,
+                onNomePlanoChange = { nome ->
+                    if (nome.length <= 100) {
+                        editarPlanoDietaViewModel.setNomePlanoAlimentar(nome)
+                        isNomePlanoDietaError = false
+                    }
+                },
+                onSaveClick = {
+                    coroutineScope.launch {
+                        enabledButton = false
+                        val (success, message) = editarPlanoDietaViewModel.editarPlanoAlimentar(
+                            planoAlimentarId
+                        )
+                        if (success) {
+                            navController.popBackStack("dieta", false)
+                        } else {
+                            enabledButton = true
+                        }
+                        Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            )
+
+        }
+
+        is RepositoryResponse.Error -> {
+            ErrorScreen()
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+fun EditarPlanoAlimentarContent(
+    editarPlanoDietaViewModel: EditarPlanoAlimentarViewModel,
+    pagerState: PagerState,
+    scrollState: ScrollState,
+    isNomePlanoDietaError: Boolean,
+    enabledButton: Boolean,
+    openDialog: MutableState<Boolean>,
+    state: RepositoryResponse.Success<PlanoAlimentarState>, // Substitua DataType pelo tipo real do seu dado
+    onNomePlanoChange: (String) -> Unit,
+    onSaveClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -106,34 +196,13 @@ fun EditarPlanoAlimentarVIew(
             .padding(start = 10.dp, end = 10.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        if (openDialog.value) {
-            CustomAlertDialog(
-                title = stringResource(R.string.deseja_voltar),
-                text = stringResource(R.string.as_alteracoes_serao_perdidas),
-                textButtomConfirm = stringResource(R.string.voltar),
-                onclose = { openDialog.value = false },
-                onConfirm = {
-                    if (navController.canGoBack) {
-                        navController.popBackStack("dieta", false)
-                    }
-                    openDialog.value = false
-                }
-            )
-        }
-
         CustomTopAppBar(onBackPressed = {
             openDialog.value = true
         }, barTitle = "Editar plano alimentar")
 
         OutlinedTextField(
-            value = uiState.nomePlanoDieta,
-            onValueChange = {
-                if (it.length <= 100) {
-                    criarPlanoDietaViewModel.setNomePlanoDieta(it)
-                    isNomePlanoDietaError = false
-                }
-            },
+            value = state.data.nomePlanoAlimentar,
+            onValueChange = onNomePlanoChange,
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(
                 keyboardType = KeyboardType.Text,
@@ -181,58 +250,51 @@ fun EditarPlanoAlimentarVIew(
                     modifier = Modifier
                         .fillMaxSize()
                         .verticalScroll(scrollState),
-                    beyondBoundsPageCount = 7,
+                    beyondBoundsPageCount = 2,
                     state = pagerState,
                     verticalAlignment = Alignment.Top,
                     key = { pageIndex -> pageIndex }
                 ) { currentPage ->
-                    CustomCardEditarDiaSemanaDieta(currentPage, criarPlanoDietaViewModel)
+                    CustomCardEditarDiaSemanaDieta(
+                        editarPlanoAlimentarViewModel = editarPlanoDietaViewModel,
+                        indiceDia = currentPage,
+                        state = state
+                    )
                 }
             }
         }
 
-        if (enabledButton) {
-            FilledTonalButton(
-                onClick = {
-                    coroutineScope.launch {
-                        enabledButton = false
-                        val (success, message) = criarPlanoDietaViewModel.editarPlanoDieta(planoAlimentarId)
-                        if (success) {
-                            navController.popBackStack("dieta", false)
-                        } else {
-                            enabledButton = true
-                        }
-                        Toast.makeText(ctx, message, Toast.LENGTH_SHORT).show()
-                    }
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = MyWhite),
-                shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 10.dp)
-                    .height(70.dp)
-                    .align(Alignment.CenterHorizontally),
-            ) {
-                Text(
-                    text = "SALVAR ALTERAÇÕES",
-                    fontFamily = myFontTitle,
-                    fontSize = 25.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                )
-            }
+        FilledTonalButton(
+            onClick = onSaveClick,
+            enabled = enabledButton,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MyWhite,
+                disabledContainerColor = Color.Gray
+            ),
+            shape = CutCornerShape(topStart = 14.dp, bottomEnd = 14.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp)
+                .height(70.dp)
+                .align(Alignment.CenterHorizontally),
+        ) {
+            Text(
+                text = "SALVAR ALTERAÇÕES",
+                fontFamily = myFontTitle,
+                fontSize = 25.sp,
+                color = MaterialTheme.colorScheme.primary,
+            )
         }
     }
 }
 
+
 @Composable
 fun CustomCardEditarDiaSemanaDieta(
+    editarPlanoAlimentarViewModel: EditarPlanoAlimentarViewModel,
     indiceDia: Int,
-    editarPlanoDietaViewModel: EditarPlanoDietaViewModel
+    state: RepositoryResponse.Success<PlanoAlimentarState>
 ) {
-
-    LocalFocusManager.current.clearFocus()
-
-    val uiState by editarPlanoDietaViewModel.editarPlanoDietaState.collectAsState()
 
     var enabledButton by remember { mutableStateOf(true) }
 
@@ -262,7 +324,7 @@ fun CustomCardEditarDiaSemanaDieta(
             )
 
 
-            uiState.refeicoesList[indiceDia].forEach { refeicao ->
+            state.data.refeicoesList[indiceDia].forEach { refeicao ->
                 Card(
                     modifier = Modifier.padding(bottom = 10.dp),
                     shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp)
@@ -293,11 +355,14 @@ fun CustomCardEditarDiaSemanaDieta(
                         Icon(
                             modifier = Modifier
                                 .clickable {
-                                    editarPlanoDietaViewModel.removerRefeicao(indiceDia, refeicao)
+                                    editarPlanoAlimentarViewModel.removerRefeicao(
+                                        indiceDia,
+                                        refeicao
+                                    )
                                 },
                             tint = MyWhite,
                             painter = painterResource(id = R.drawable.baseline_close_24),
-                            contentDescription = "Remover exercício",
+                            contentDescription = "Remover refeição",
                         )
                     }
                 }
@@ -315,7 +380,8 @@ fun CustomCardEditarDiaSemanaDieta(
                         openDialog.value = false
                         enabledButton = true
                     },
-                    editarPlanoDietaViewModel
+                    editarPlanoAlimentarViewModel,
+                    state
                 )
             }
 
@@ -345,23 +411,22 @@ fun CustomCardEditarDiaSemanaDieta(
     }
 }
 
-
 @Composable
 fun CustomAlertDialogEditarRefeicao(
     title: String,
     dia: Int,
     onClickOk: () -> Unit,
     onClickCancelar: () -> Unit,
-    editarPlanoDietaViewModel: EditarPlanoDietaViewModel
+    editarPlanoAlimentarViewModel: EditarPlanoAlimentarViewModel,
+    state: RepositoryResponse.Success<PlanoAlimentarState>
 ) {
-    val uiState by editarPlanoDietaViewModel.editarPlanoDietaState.collectAsState()
-
     var isTipoRefeicaoError by rememberSaveable { mutableStateOf(false) }
     var isDetalhesRefeicaoError by rememberSaveable { mutableStateOf(false) }
 
     var checkerClone by rememberSaveable { mutableStateOf(false) }
 
     AlertDialog(
+        shape = CutCornerShape(topStart = 24.dp, bottomEnd = 24.dp),
         containerColor = Color.White,
         onDismissRequest = {
             onClickCancelar()
@@ -383,10 +448,10 @@ fun CustomAlertDialogEditarRefeicao(
                 verticalArrangement = Arrangement.Center
             ) {
                 OutlinedTextField(
-                    value = uiState.tipoRefeicao[dia],
+                    value = state.data.tipoRefeicao[dia],
                     onValueChange = {
                         if (it.length <= 200) {
-                            editarPlanoDietaViewModel.setTipoRefeicao(dia, it)
+                            editarPlanoAlimentarViewModel.setTipoRefeicao(dia, it)
                             isTipoRefeicaoError = false
                         }
                     },
@@ -417,10 +482,10 @@ fun CustomAlertDialogEditarRefeicao(
                 )
 
                 OutlinedTextField(
-                    value = uiState.detalhesRefeicao[dia],
+                    value = state.data.detalhesRefeicao[dia],
                     onValueChange = {
                         if (it.length <= 500) {
-                            editarPlanoDietaViewModel.setDetalhesRefeicao(dia, it)
+                            editarPlanoAlimentarViewModel.setDetalhesRefeicao(dia, it)
                             isDetalhesRefeicaoError = false
                         }
                     },
@@ -476,8 +541,8 @@ fun CustomAlertDialogEditarRefeicao(
 
                 OutlinedButton(
                     onClick = {
-                        val tipoRefeicao = uiState.tipoRefeicao[dia]
-                        val detalhesRefeicao = uiState.detalhesRefeicao[dia]
+                        val tipoRefeicao = state.data.tipoRefeicao[dia]
+                        val detalhesRefeicao = state.data.detalhesRefeicao[dia]
 
                         if (tipoRefeicao.isNotEmpty() && detalhesRefeicao.isNotEmpty()) {
 
@@ -488,7 +553,7 @@ fun CustomAlertDialogEditarRefeicao(
                                         tipoRefeicao,
                                         detalhesRefeicao,
                                         onClickOk,
-                                        editarPlanoDietaViewModel
+                                        editarPlanoAlimentarViewModel
                                     )
                                 }
                             } else {
@@ -497,7 +562,7 @@ fun CustomAlertDialogEditarRefeicao(
                                     tipoRefeicao,
                                     detalhesRefeicao,
                                     onClickOk,
-                                    editarPlanoDietaViewModel
+                                    editarPlanoAlimentarViewModel
                                 )
                             }
 
@@ -542,6 +607,8 @@ fun CustomAlertDialogEditarRefeicao(
         confirmButton = {},
         dismissButton = {},
     )
+
+
 }
 
 fun adicionarRefeicao(
@@ -549,9 +616,9 @@ fun adicionarRefeicao(
     tipo: String,
     detalhes: String,
     onClickOk: () -> Unit,
-    editarPlanoDietaViewModel: EditarPlanoDietaViewModel
+    editarPlanoAlimentarViewModel: EditarPlanoAlimentarViewModel
 ) {
-    editarPlanoDietaViewModel.adicionarRefeicao(
+    editarPlanoAlimentarViewModel.adicionarRefeicao(
         indiceDia,
         Refeicao(
             tipo = tipo,
@@ -560,7 +627,7 @@ fun adicionarRefeicao(
         )
     )
 
-    editarPlanoDietaViewModel.setTipoRefeicao(indiceDia, "")
-    editarPlanoDietaViewModel.setDetalhesRefeicao(indiceDia, "")
+    editarPlanoAlimentarViewModel.setTipoRefeicao(indiceDia, "")
+    editarPlanoAlimentarViewModel.setDetalhesRefeicao(indiceDia, "")
     onClickOk()
 }

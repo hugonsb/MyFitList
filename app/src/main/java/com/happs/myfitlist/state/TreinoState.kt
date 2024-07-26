@@ -15,6 +15,5 @@ data class TreinoState(
     ),
     val planoTreinoPrincipal: PlanoTreino = PlanoTreino(nome = "", idUsuario = -1),
     val listaPlanosTreino: List<PlanoTreino> = emptyList(),
-    val diasComExercicios: Array<Pair<DiaTreino, List<Exercicio>>> = emptyArray(),
-    val isLoaded: Boolean = false
+    val diasComExercicios: Array<Pair<DiaTreino, List<Exercicio>>> = emptyArray()
 )
