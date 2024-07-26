@@ -6,7 +6,6 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -28,6 +27,11 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -241,25 +245,20 @@ fun EditarPlanoAlimentarContent(
             modifier = Modifier
                 .weight(1f)
         ) {
-            Box(
+            HorizontalPager(
                 modifier = Modifier
-                    .weight(1f)
-            ) {
-                HorizontalPager(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(scrollState),
-                    beyondBoundsPageCount = 2,
-                    state = pagerState,
-                    verticalAlignment = Alignment.Top,
-                    key = { pageIndex -> pageIndex }
-                ) { currentPage ->
-                    CustomCardEditarDiaSemanaDieta(
-                        editarPlanoAlimentarViewModel = editarPlanoDietaViewModel,
-                        indiceDia = currentPage,
-                        state = state
-                    )
-                }
+                    .fillMaxSize()
+                    .verticalScroll(scrollState),
+                beyondBoundsPageCount = 2,
+                state = pagerState,
+                verticalAlignment = Alignment.Top,
+                key = { pageIndex -> pageIndex }
+            ) { currentPage ->
+                CustomCardEditarDiaSemanaDieta(
+                    editarPlanoAlimentarViewModel = editarPlanoDietaViewModel,
+                    indiceDia = currentPage,
+                    state = state
+                )
             }
         }
 
@@ -297,7 +296,36 @@ fun CustomCardEditarDiaSemanaDieta(
 
     var enabledButton by remember { mutableStateOf(true) }
 
-    val openDialog = remember { mutableStateOf(false) }
+    val openDialogAdicionarRefeicao = remember { mutableStateOf(false) }
+    val openDialogCopy = remember { mutableStateOf(false) }
+
+    if (openDialogAdicionarRefeicao.value) {
+        CustomAlertDialogEditarRefeicao(
+            title = "Adicionar Refeição",
+            dia = indiceDia,
+            onClickOk = {
+                openDialogAdicionarRefeicao.value = false
+                enabledButton = true
+            },
+            onClickCancelar = {
+                openDialogAdicionarRefeicao.value = false
+                enabledButton = true
+            },
+            editarPlanoAlimentarViewModel,
+            state
+        )
+    }
+
+    if (openDialogCopy.value) {
+        CustomAlertDialogCopyRefeicoes(
+            indiceDia = indiceDia,
+            title = "Copiar refeições",
+            onClickOk = { openDialogCopy.value = false },
+            onClickCancelar = { openDialogCopy.value = false },
+            editarPlanoAlimentarViewModel = editarPlanoAlimentarViewModel,
+            state
+        )
+    }
 
     Card(
         modifier = Modifier
@@ -311,17 +339,25 @@ fun CustomCardEditarDiaSemanaDieta(
                 .background(MyWhite)
                 .padding(10.dp)
         ) {
-            Text(
-                modifier = Modifier
-                    .padding(start = 5.dp, bottom = 5.dp)
-                    .align(Alignment.Start),
-                text = DiasList.dias[indiceDia],
-                fontFamily = myFontTitle,
-                fontSize = 25.sp,
-                fontWeight = FontWeight.Bold,
-                color = MyBlack,
-            )
-
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    modifier = Modifier
+                        .padding(start = 5.dp, bottom = 5.dp),
+                    text = DiasList.dias[indiceDia],
+                    fontFamily = myFontTitle,
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MyBlack,
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    modifier = Modifier
+                        .clickable { openDialogCopy.value = true },
+                    tint = MyBlack,
+                    painter = painterResource(id = R.drawable.baseline_content_copy_24),
+                    contentDescription = "Copiar refeição",
+                )
+            }
 
             state.data.refeicoesList[indiceDia].forEach { refeicao ->
                 Card(
@@ -367,27 +403,10 @@ fun CustomCardEditarDiaSemanaDieta(
                 }
             }
 
-            if (openDialog.value) {
-                CustomAlertDialogEditarRefeicao(
-                    title = "Adicionar Refeição",
-                    dia = indiceDia,
-                    onClickOk = {
-                        openDialog.value = false
-                        enabledButton = true
-                    },
-                    onClickCancelar = {
-                        openDialog.value = false
-                        enabledButton = true
-                    },
-                    editarPlanoAlimentarViewModel,
-                    state
-                )
-            }
-
             OutlinedButton(
                 onClick = {
                     enabledButton = false
-                    openDialog.value = true
+                    openDialogAdicionarRefeicao.value = true
                 },
                 enabled = enabledButton,
                 colors = ButtonDefaults.buttonColors(
@@ -405,7 +424,6 @@ fun CustomCardEditarDiaSemanaDieta(
                     color = MyWhite,
                 )
             }
-
         }
     }
 }
@@ -608,6 +626,141 @@ fun CustomAlertDialogEditarRefeicao(
     )
 
 
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomAlertDialogCopyRefeicoes(
+    indiceDia: Int,
+    title: String,
+    onClickOk: () -> Unit,
+    onClickCancelar: () -> Unit,
+    editarPlanoAlimentarViewModel: EditarPlanoAlimentarViewModel,
+    state: RepositoryResponse.Success<PlanoAlimentarState>
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val diasListAtualizada = DiasList.dias.filter { it != DiasList.dias[indiceDia] }
+    var selectedItem by remember { mutableStateOf(diasListAtualizada.first()) }
+
+    AlertDialog(
+        shape = CutCornerShape(topStart = 24.dp, bottomEnd = 24.dp),
+        containerColor = Color.White,
+        onDismissRequest = {
+            onClickCancelar()
+        },
+        title = {
+            Text(
+                title,
+                fontSize = 35.sp,
+                color = MyBlack,
+                textAlign = TextAlign.Center,
+                fontFamily = myFontTitle,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+
+                Text(
+                    text = "Copiar refeições de ${DiasList.dias[indiceDia]} para:",
+                    color = MyBlack,
+                    textAlign = TextAlign.Center,
+                    fontFamily = myFontBody,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedItem,
+                        textStyle = TextStyle(
+                            fontFamily = myFontBody,
+                            fontWeight = FontWeight.Bold,
+                            color = MyBlack
+                        ),
+                        onValueChange = {}, // Não permite edição direta
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier.menuAnchor()
+                    )
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        diasListAtualizada.forEach { dia ->
+                            DropdownMenuItem(
+                                {
+                                    Text(
+                                        text = dia,
+                                        fontFamily = myFontBody,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                },
+                                onClick = {
+                                    selectedItem = dia
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(25.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        val listRefeicoes = state.data.refeicoesList[indiceDia]
+                        for (refeicao in listRefeicoes) {
+                            adicionarRefeicao(
+                                DiasList.dias.indexOf(selectedItem),
+                                refeicao.tipo,
+                                refeicao.detalhes,
+                                onClickOk,
+                                editarPlanoAlimentarViewModel
+                            )
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MyRed),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .width(120.dp)
+                        .height(50.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.ok),
+                        fontFamily = myFontTitle,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MyWhite,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                Text(
+                    text = stringResource(id = R.string.cancelar), fontFamily = myFontTitle,
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MyBlack,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .clickable { onClickCancelar() }
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {},
+    )
 }
 
 fun adicionarRefeicao(
