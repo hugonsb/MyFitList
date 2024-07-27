@@ -482,6 +482,7 @@ fun CustomPagerDiaDieta(listDiaDieta: Array<Pair<DiaDieta, List<Refeicao>>>) {
                 ) {
                     Column(
                         modifier = Modifier
+                            .fillMaxWidth()
                             .background(MyWhite)
                             .padding(10.dp)
                     ) {

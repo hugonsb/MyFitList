@@ -521,6 +521,7 @@ fun CustomPagerDiaTreino(listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>)
                 ) {
                     Column(
                         modifier = Modifier
+                            .fillMaxWidth()
                             .background(MyWhite)
                             .padding(10.dp)
                     ) {
