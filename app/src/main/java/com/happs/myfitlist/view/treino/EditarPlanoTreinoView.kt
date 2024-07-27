@@ -591,21 +591,14 @@ fun CustomAlertDialogEditarExercicio(
                         val numeroRepeticoes = state.data.numeroRepeticoes[dia]
 
                         if (nomeExercicio.isNotEmpty() && numeroSeries.isNotEmpty() && numeroRepeticoes.isNotEmpty()) {
-
-                            editarPlanoTreinoViewModel.adicionarExercicio(
-                                dia,
-                                Exercicio(
-                                    nome = nomeExercicio,
-                                    numeroSeries = numeroSeries.toInt(),
-                                    numeroRepeticoes = numeroRepeticoes.toInt(),
-                                    idDiaTreino = -1
-                                )
+                            adicionarExercicio(
+                                indiceDia = dia,
+                                nomeExercicio,
+                                numeroSeries.toInt(),
+                                numeroRepeticoes.toInt(),
+                                onClickOk,
+                                editarPlanoTreinoViewModel
                             )
-
-                            editarPlanoTreinoViewModel.setNomeExercicio(dia, "")
-                            editarPlanoTreinoViewModel.setNumeroSeries(dia, "")
-                            editarPlanoTreinoViewModel.setNumeroRepeticoes(dia, "")
-                            onClickOk()
                         } else {
                             if (nomeExercicio.isEmpty()) {
                                 isNomeExercicioError = true
@@ -650,4 +643,28 @@ fun CustomAlertDialogEditarExercicio(
         confirmButton = {},
         dismissButton = {},
     )
+}
+
+fun adicionarExercicio(
+    indiceDia: Int,
+    nomeExercicio: String,
+    numeroSeries: Int,
+    numeroRepeticoes: Int,
+    onClickOk: () -> Unit,
+    editarPlanoTreinoViewModel: EditarPlanoTreinoViewModel
+) {
+    editarPlanoTreinoViewModel.adicionarExercicio(
+        indiceDia,
+        Exercicio(
+            nome = nomeExercicio,
+            numeroSeries = numeroSeries,
+            numeroRepeticoes = numeroRepeticoes,
+            idDiaTreino = -1
+        )
+    )
+
+    editarPlanoTreinoViewModel.setNomeExercicio(indiceDia, "")
+    editarPlanoTreinoViewModel.setNumeroSeries(indiceDia, "")
+    editarPlanoTreinoViewModel.setNumeroRepeticoes(indiceDia, "")
+    onClickOk()
 }
