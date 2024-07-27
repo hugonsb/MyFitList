@@ -253,7 +253,8 @@ fun EditarPlanoTreinoContent(
                     beyondBoundsPageCount = 2,
                     state = pagerState,
                     verticalAlignment = Alignment.Top,
-                    key = { pageIndex -> pageIndex }
+                    key = { pageIndex -> pageIndex },
+                    userScrollEnabled = false
                 ) { currentPage ->
                     CustomCardEditarDiaSemanaa(currentPage, editarPlanoTreinoViewModel, state)
                 }

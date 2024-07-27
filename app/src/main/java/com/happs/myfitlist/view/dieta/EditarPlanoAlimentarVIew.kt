@@ -252,7 +252,8 @@ fun EditarPlanoAlimentarContent(
                 beyondBoundsPageCount = 2,
                 state = pagerState,
                 verticalAlignment = Alignment.Top,
-                key = { pageIndex -> pageIndex }
+                key = { pageIndex -> pageIndex },
+                userScrollEnabled = false
             ) { currentPage ->
                 CustomCardEditarDiaSemanaDieta(
                     editarPlanoAlimentarViewModel = editarPlanoDietaViewModel,

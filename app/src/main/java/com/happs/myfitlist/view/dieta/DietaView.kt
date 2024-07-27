@@ -475,7 +475,8 @@ fun CustomPagerDiaDieta(listDiaDieta: Array<Pair<DiaDieta, List<Refeicao>>>) {
                 pageSpacing = 10.dp,
                 state = pagerState,
                 verticalAlignment = Alignment.Top,
-                key = { pageIndex -> pageIndex }
+                key = { pageIndex -> pageIndex },
+                userScrollEnabled = false
             ) { currentPage ->
                 Card(
                     shape = CutCornerShape(topStart = 15.dp, bottomEnd = 15.dp)
