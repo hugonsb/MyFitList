@@ -509,11 +509,10 @@ fun CustomPagerDiaTreino(listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>)
         ) {
             HorizontalPager(
                 modifier = Modifier
-                    .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding(bottom = 75.dp),
+                pageSpacing = 10.dp,
                 state = pagerState,
-                beyondBoundsPageCount = 7,
                 verticalAlignment = Alignment.Top,
                 key = { pageIndex -> pageIndex }
             ) { currentPage ->
@@ -523,7 +522,6 @@ fun CustomPagerDiaTreino(listDiaTreino: Array<Pair<DiaTreino, List<Exercicio>>>)
                     Column(
                         modifier = Modifier
                             .background(MyWhite)
-                            .fillMaxWidth()
                             .padding(10.dp)
                     ) {
                         Text(

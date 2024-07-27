@@ -470,10 +470,9 @@ fun CustomPagerDiaDieta(listDiaDieta: Array<Pair<DiaDieta, List<Refeicao>>>) {
         ) {
             HorizontalPager(
                 modifier = Modifier
-                    .fillMaxSize()
                     .verticalScroll(scrollState)
                     .padding(bottom = 75.dp),
-                beyondBoundsPageCount = 7,
+                pageSpacing = 10.dp,
                 state = pagerState,
                 verticalAlignment = Alignment.Top,
                 key = { pageIndex -> pageIndex }
@@ -484,7 +483,6 @@ fun CustomPagerDiaDieta(listDiaDieta: Array<Pair<DiaDieta, List<Refeicao>>>) {
                     Column(
                         modifier = Modifier
                             .background(MyWhite)
-                            .fillMaxWidth()
                             .padding(10.dp)
                     ) {
                         Text(
