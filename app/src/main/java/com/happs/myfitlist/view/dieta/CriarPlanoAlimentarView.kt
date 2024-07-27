@@ -241,6 +241,7 @@ fun CustomCardCadastroDiaSemanaDieta(
     indiceDia: Int,
     criarPlanoAlimentarViewModel: CriarPlanoAlimentarViewModel
 ) {
+    val ctx = LocalContext.current
 
     val uiState by criarPlanoAlimentarViewModel.criarPlanoAlimentarState.collectAsState()
 
@@ -300,7 +301,17 @@ fun CustomCardCadastroDiaSemanaDieta(
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     modifier = Modifier
-                        .clickable { openDialogCopy.value = true },
+                        .clickable {
+                            if (uiState.refeicoesList[indiceDia].isNotEmpty()) {
+                                openDialogCopy.value = true
+                            } else {
+                                Toast.makeText(
+                                    ctx,
+                                    "Não há refeições para copiar",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        },
                     tint = MyBlack,
                     painter = painterResource(id = R.drawable.baseline_content_copy_24),
                     contentDescription = "Copiar refeição",

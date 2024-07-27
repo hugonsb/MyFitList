@@ -293,6 +293,7 @@ fun CustomCardEditarDiaSemanaDieta(
     indiceDia: Int,
     state: RepositoryResponse.Success<PlanoAlimentarState>
 ) {
+    val ctx = LocalContext.current
 
     var enabledButton by remember { mutableStateOf(true) }
 
@@ -323,7 +324,7 @@ fun CustomCardEditarDiaSemanaDieta(
             onClickOk = { openDialogCopy.value = false },
             onClickCancelar = { openDialogCopy.value = false },
             editarPlanoAlimentarViewModel = editarPlanoAlimentarViewModel,
-            state
+            state = state
         )
     }
 
@@ -352,7 +353,17 @@ fun CustomCardEditarDiaSemanaDieta(
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     modifier = Modifier
-                        .clickable { openDialogCopy.value = true },
+                        .clickable {
+                            if (state.data.refeicoesList[indiceDia].isNotEmpty()) {
+                                openDialogCopy.value = true
+                            } else {
+                                Toast.makeText(
+                                    ctx,
+                                    "Não há refeições para copiar",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        },
                     tint = MyBlack,
                     painter = painterResource(id = R.drawable.baseline_content_copy_24),
                     contentDescription = "Copiar refeição",

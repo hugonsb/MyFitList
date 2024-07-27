@@ -25,6 +25,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -240,6 +245,7 @@ fun CustomCardCadastroDiaSemanaTreino(
     indiceDia: Int,
     criarPlanoTreinoViewModel: CriarPlanoTreinoViewModel
 ) {
+    val ctx = LocalContext.current
 
     val uiState by criarPlanoTreinoViewModel.criarPlanoTreinoState.collectAsState()
 
@@ -248,6 +254,33 @@ fun CustomCardCadastroDiaSemanaTreino(
     var enabledButton by remember { mutableStateOf(true) }
 
     val openDialog = remember { mutableStateOf(false) }
+    val openDialogCopy = remember { mutableStateOf(false) }
+
+    if (openDialog.value) {
+        CustomAlertDialogCadastroExercicio(
+            title = stringResource(R.string.adicionar_exercicio),
+            dia = indiceDia,
+            onClickOk = {
+                openDialog.value = false
+                enabledButton = true
+            },
+            onClickCancelar = {
+                openDialog.value = false
+                enabledButton = true
+            },
+            criarPlanoTreinoViewModel
+        )
+    }
+
+    if (openDialogCopy.value) {
+        CustomAlertDialogCopyExercicios(
+            indiceDia = indiceDia,
+            title = "Copiar exercícios",
+            onClickOk = { openDialogCopy.value = false },
+            onClickCancelar = { openDialogCopy.value = false },
+            criarPlanoTreinoViewModel = criarPlanoTreinoViewModel
+        )
+    }
 
     Card(
         modifier = Modifier
@@ -261,16 +294,35 @@ fun CustomCardCadastroDiaSemanaTreino(
                 .background(MyWhite)
                 .padding(10.dp)
         ) {
-            Text(
-                modifier = Modifier
-                    .padding(start = 5.dp, bottom = 5.dp)
-                    .align(Alignment.Start),
-                text = DiasList.dias[indiceDia],
-                fontFamily = myFontTitle,
-                fontSize = 25.sp,
-                fontWeight = FontWeight.Bold,
-                color = MyBlack,
-            )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text(
+                    modifier = Modifier
+                        .padding(start = 5.dp, bottom = 5.dp),
+                    text = DiasList.dias[indiceDia],
+                    fontFamily = myFontTitle,
+                    fontSize = 25.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MyBlack,
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    modifier = Modifier
+                        .clickable {
+                            if (uiState.exerciciosList[indiceDia].isNotEmpty()) {
+                                openDialogCopy.value = true
+                            } else {
+                                Toast.makeText(
+                                    ctx,
+                                    "Não há exercícios para copiar",
+                                    Toast.LENGTH_SHORT
+                                ).show()
+                            }
+                        },
+                    tint = MyBlack,
+                    painter = painterResource(id = R.drawable.baseline_content_copy_24),
+                    contentDescription = "Copiar exercícios",
+                )
+            }
 
             Column {
                 OutlinedTextField(
@@ -342,22 +394,6 @@ fun CustomCardCadastroDiaSemanaTreino(
                             )
                         }
                     }
-                }
-
-                if (openDialog.value) {
-                    CustomAlertDialogCadastroExercicio(
-                        title = stringResource(R.string.adicionar_exercicio),
-                        dia = indiceDia,
-                        onClickOk = {
-                            openDialog.value = false
-                            enabledButton = true
-                        },
-                        onClickCancelar = {
-                            openDialog.value = false
-                            enabledButton = true
-                        },
-                        criarPlanoTreinoViewModel
-                    )
                 }
 
                 OutlinedButton(
@@ -566,6 +602,143 @@ fun CustomAlertDialogCadastroExercicio(
                             if (numeroRepeticoes.isEmpty()) {
                                 isNumeroRepeticoesError = true
                             }
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = MyRed),
+                    shape = RoundedCornerShape(10.dp),
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .width(120.dp)
+                        .height(50.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.ok),
+                        fontFamily = myFontTitle,
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = MyWhite,
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                Text(
+                    text = stringResource(id = R.string.cancelar), fontFamily = myFontTitle,
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MyBlack,
+                    modifier = Modifier
+                        .align(Alignment.CenterHorizontally)
+                        .clickable { onClickCancelar() }
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {},
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CustomAlertDialogCopyExercicios(
+    indiceDia: Int,
+    title: String,
+    onClickOk: () -> Unit,
+    onClickCancelar: () -> Unit,
+    criarPlanoTreinoViewModel: CriarPlanoTreinoViewModel,
+) {
+    val uiState by criarPlanoTreinoViewModel.criarPlanoTreinoState.collectAsState()
+
+    var expanded by remember { mutableStateOf(false) }
+    val diasListAtualizada = DiasList.dias.filter { it != DiasList.dias[indiceDia] }
+    var selectedItem by remember { mutableStateOf(diasListAtualizada.first()) }
+
+    AlertDialog(
+        shape = CutCornerShape(topStart = 24.dp, bottomEnd = 24.dp),
+        containerColor = Color.White,
+        onDismissRequest = {
+            onClickCancelar()
+        },
+        title = {
+            Text(
+                title,
+                fontSize = 35.sp,
+                color = MyBlack,
+                textAlign = TextAlign.Center,
+                fontFamily = myFontTitle,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+
+                Text(
+                    text = "Copiar exercícios de ${DiasList.dias[indiceDia]} para:",
+                    color = MyBlack,
+                    textAlign = TextAlign.Center,
+                    fontFamily = myFontBody,
+                    fontWeight = FontWeight.Bold
+                )
+
+                Spacer(modifier = Modifier.height(15.dp))
+
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = selectedItem,
+                        textStyle = TextStyle(
+                            fontFamily = myFontBody,
+                            fontWeight = FontWeight.Bold,
+                            color = MyBlack
+                        ),
+                        onValueChange = {},
+                        readOnly = true,
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier.menuAnchor()
+                    )
+
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        diasListAtualizada.forEach { dia ->
+                            DropdownMenuItem(
+                                {
+                                    Text(
+                                        text = dia,
+                                        fontFamily = myFontBody,
+                                        fontWeight = FontWeight.Bold,
+                                    )
+                                },
+                                onClick = {
+                                    selectedItem = dia
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(25.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        val listExercicios = uiState.exerciciosList[indiceDia]
+                        for (exercicio in listExercicios) {
+                            adicionarExercicio(
+                                DiasList.dias.indexOf(selectedItem),
+                                exercicio.nome,
+                                exercicio.numeroSeries,
+                                exercicio.numeroRepeticoes,
+                                onClickOk,
+                                criarPlanoTreinoViewModel
+                            )
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = MyRed),
