@@ -240,7 +240,11 @@ fun PlanoTreinoPrincipal(
     navController: NavHostController,
     clickPlano: () -> Unit
 ) {
-    Row {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(80.dp),
+    ) {
         Card(
             onClick = { clickPlano() },
             modifier = Modifier.weight(1f),
@@ -248,21 +252,35 @@ fun PlanoTreinoPrincipal(
         ) {
             Row(
                 modifier = Modifier
-                    .height(55.dp)
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.onSecondary)
                     .padding(start = 10.dp, end = 20.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = planoTreinoPrincipal.nome,
-                    fontFamily = myFontTitle,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    fontSize = 22.sp,
-                    color = MyWhite,
-                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(80.dp)
+                        .padding(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth(),
+                        text = planoTreinoPrincipal.nome,
+                        fontFamily = myFontTitle,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        fontSize = 28.sp,
+                        color = MyWhite
+                    )
+                    Icon(
+                        modifier = Modifier.size(25.dp),
+                        painter = painterResource(id = R.drawable.baseline_keyboard_arrow_down_24),
+                        contentDescription = "Ver todos os planos de treino",
+                        tint = MyWhite
+                    )
+                }
             }
         }
 
@@ -276,14 +294,15 @@ fun PlanoTreinoPrincipal(
                     launchSingleTop = true
                 }
             },
-            shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp)
+            shape = CutCornerShape(topStart = 10.dp, bottomEnd = 10.dp),
         ) {
             Row(
                 modifier = Modifier
-                    .height(55.dp)
+                    .size(80.dp)
                     .background(MaterialTheme.colorScheme.onSecondary)
-                    .padding(start = 15.dp, end = 15.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                    .padding(start = 18.dp, end = 18.dp)
+                    .align(Alignment.CenterHorizontally),
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
@@ -291,7 +310,7 @@ fun PlanoTreinoPrincipal(
                     painter = painterResource(id = R.drawable.baseline_edit_24),
                     contentDescription = "Editar plano",
                     modifier = Modifier
-                        .size(30.dp)
+                        .size(35.dp)
                 )
             }
         }
@@ -417,12 +436,10 @@ fun PlanosTreinoList(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally)
             ) {
-                Text(
-                    text = "OK",
-                    fontFamily = myFontTitle,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MyWhite,
+                Icon(
+                    tint = MyWhite,
+                    painter = painterResource(id = R.drawable.baseline_keyboard_arrow_up_24),
+                    contentDescription = "Fechar lista"
                 )
             }
         }
@@ -442,7 +459,7 @@ fun DiasTreinoList(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = "Experimente criar um plano de treino",
+                text = "Experimente criar um plano de treino!",
                 textAlign = TextAlign.Center,
                 fontFamily = myFontTitle,
                 fontSize = 25.sp,
